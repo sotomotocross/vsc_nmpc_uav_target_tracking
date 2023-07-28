@@ -1,1 +1,1 @@
-# vsc_nmpc_uav_target_tracking
+# Vision-based NMPC for target tracking using UAVs
