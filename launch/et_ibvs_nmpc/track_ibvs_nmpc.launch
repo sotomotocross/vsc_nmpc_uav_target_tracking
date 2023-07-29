@@ -1,0 +1,4 @@
+<launch>
+
+   <node pkg="vsc_nmpc_uav_target_tracking" type="track_ibvs_nmpc" name="track_ibvs_nmpc" output="screen" /> 
+</launch> 

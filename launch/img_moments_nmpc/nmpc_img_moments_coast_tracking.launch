@@ -1,0 +1,6 @@
+<launch>
+
+   <node pkg="vsc_nmpc_uav_target_tracking" type="ibvs_img_moments_coast_tracking" name="ibvs_img_moments_coast_tracking" output="screen" /> 
+    <rosparam command="load" name="parameters_of_control" file="$(find vsc_nmpc_uav_target_tracking)/config/ibvs_img_moments.yaml" />
+
+</launch> 

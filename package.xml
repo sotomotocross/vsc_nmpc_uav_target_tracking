@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>mpcpack</name>
+  <name>vsc_nmpc_uav_target_tracking</name>
   <version>0.0.0</version>
-  <description>The mpcpack package</description>
+  <description>The vsc_nmpc_uav_target_tracking package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
