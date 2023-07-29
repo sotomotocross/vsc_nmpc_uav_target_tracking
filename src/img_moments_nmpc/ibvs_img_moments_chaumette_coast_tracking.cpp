@@ -6,7 +6,7 @@
 #include "img_seg_cnn/POLYcalc_custom_tf.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Float64MultiArray.h"
-#include "mpcpack/rec.h"
+#include "vsc_nmpc_uav_target_tracking/rec.h"
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -98,7 +98,6 @@ int flag;
 
 MatrixXd img_moments_system(VectorXd moments)
 {
-   // cout << "Milise mou gia auto!!!" << endl;
    MatrixXd model_mat(dim_s, dim_inputs);
    MatrixXd Le(dim_s, dim_inputs);
    Le.setZero(dim_s, dim_inputs);
@@ -552,7 +551,7 @@ int main(int argc, char **argv)
 
    // Create publishers
    ros::Publisher vel_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 1);
-   ros::Publisher rec_pub = nh.advertise<mpcpack::rec>("/mpcpack/msg/rec", 1);
+   ros::Publisher rec_pub = nh.advertise<vsc_nmpc_uav_target_tracking::rec>("/vsc_nmpc_uav_target_tracking/msg/rec", 1);
    ros::Publisher cmd_vel_pub = nh.advertise<std_msgs::Float64MultiArray>("/cmd_vel", 1);
    ros::Publisher state_vec_pub = nh.advertise<std_msgs::Float64MultiArray>("/state_vec", 1);
    ros::Publisher state_vec_des_pub = nh.advertise<std_msgs::Float64MultiArray>("/state_vec_des", 1);

@@ -4,8 +4,9 @@
 #include "img_seg_cnn/PREDdata.h"
 #include "img_seg_cnn/POLYcalc_custom.h"
 #include "img_seg_cnn/POLYcalc_custom_tf.h"
+#include "img_seg_cnn/Optical_flow_custom.h"
 #include "std_msgs/Float64.h"
-#include "mpcpack/rec.h"
+#include "vsc_nmpc_uav_target_tracking/rec.h"
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -25,6 +26,18 @@
 
 using namespace std;
 using namespace Eigen;
+
+// #include <sstream> 
+// // using Eigen::EigenBase;   
+// // using std::ostringstream; 
+
+// template <typename Derived>
+// string get_shape(const EigenBase<Derived>& x)
+// {
+//     ostringstream oss;
+//     oss  << "(" << x.rows() << ", " << x.cols() << ")";
+//     return oss.str();
+// }
 
 double cX, cY;
 int cX_int, cY_int;
@@ -118,6 +131,8 @@ double sigma_constraints_square_log = log(sigma_constraints_square);
 
 double angle_deg_constraint = 45;
 double angle_deg_constraint_tan = tan((angle_deg_constraint / 180) * 3.14);
+
+double mean_opt_flow, mean_final_opt_flow;
 
 // distance between two 2D points
 double distance(double x1, double y1, double x2, double y2)
@@ -962,6 +977,70 @@ VectorXd IBVSSystem(VectorXd camTwist)
     return Le * camTwist;
 }
 
+MatrixXd tracker_calculation(){
+    MatrixXd grad_of_system(transformed_features.size(),dim_s);
+    grad_of_system.setZero(transformed_features.size(),dim_s);
+    // cout << "\ngrad_of_system: \n" << grad_of_system << endl;
+
+    float N = transformed_features.size()/2;
+    // cout << "N = " << N << endl;
+    // cout << "1/N = " << 1/N << endl;
+    double E_1 = (transformed_features[0] + transformed_features[1] - 2*(((opencv_moments[1] / opencv_moments[0]) - cu) / l));
+
+    // First feature (first - last)
+    double area_0 = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[3] - transformed_features[transformed_features.size()-1]);
+    double area_1 = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[2] + transformed_features[transformed_features.size()-2]);
+    double sgn = (1.0 + 0.0 - (2/N))/pow(E_1,2);
+    double alpha_0 = sgn*(-(transformed_features[1] + transformed_features[3] - 2*(((opencv_moments[2] / opencv_moments[0]) - cu) / l)));
+    double alpha_1 = sgn*(transformed_features[0] + transformed_features[1] - 2*(((opencv_moments[1] / opencv_moments[0]) - cu) / l));
+
+    grad_of_system.row(0) << 1.0/N, 0.0, area_0, alpha_0;
+    grad_of_system.row(1) << 0, 1.0/N, area_1, alpha_1;
+    // ---------------------------------------
+
+    // Second feature
+    double area_k = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[5] - transformed_features[1]);
+    double area_k_p_1 = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[4] + transformed_features[0]);
+    double sgn_2 = (1.0 + 0.0 - (2/N))/pow(E_1,2);
+    double alpha_k = (-(transformed_features[1] + transformed_features[3] - 2*(((opencv_moments[2] / opencv_moments[0]) - cu) / l)));
+    double alpha_k_p_1 = (transformed_features[0] + transformed_features[1] - 2*(((opencv_moments[1] / opencv_moments[0]) - cu) / l));  
+
+    grad_of_system.row(2) << 1/N, 0.0, area_k, sgn_2*alpha_k;
+    grad_of_system.row(3) << 0, 1/N, area_k_p_1, sgn_2*alpha_k_p_1;
+    // ----------------------------------------------
+
+    // Last feature (last - first)
+    double area_last_x = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[1] - transformed_features[transformed_features.size()-3]);
+    double area_last_y = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[0] + transformed_features[transformed_features.size()-4]);
+    double sgn_1 = (0.0 + 0.0 - (2/N))/pow(E_1,2);
+    double alpha_last_x = sgn_1*(-(transformed_features[1] + transformed_features[3] - 2*(((opencv_moments[2] / opencv_moments[0]) - cu) / l)));
+    double alpha_last_y = sgn_1*(transformed_features[0] + transformed_features[1] - 2*(((opencv_moments[1] / opencv_moments[0]) - cu) / l));
+
+    grad_of_system.row(transformed_features.size()-2) << 1.0/N, 0.0, area_last_x, alpha_last_x;
+    grad_of_system.row(transformed_features.size()-1) << 0, 1.0/N, area_last_y, alpha_last_y;
+    // ----------------------------------
+
+    double sgn_3 = (0.0 + 0.0 - (2/N))/pow(E_1,2); 
+
+    for (int k = 4; k < transformed_features.size()-2; k++){
+
+        double area_k = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[k+1] - transformed_features[k-1]);
+        double area_k_p_1 = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[k+2] + transformed_features[k-2]);
+
+        grad_of_system.row(k) << 1/N, 0.0, area_k, sgn_3*alpha_k;
+        grad_of_system.row(k+1) << 0, 1/N, area_k_p_1, sgn_3*alpha_k_p_1;
+
+        // grad_of_system.row(k) << 1/N, 0.0, area_k, sgn_2*alpha_k;
+        // grad_of_system.row(k+1) << 0, 1/N, area_k_p_1, sgn_2*alpha_k_p_1;
+        k++;
+    }
+
+    // cout << "grad_of_system: \n" << grad_of_system << endl;
+    // cout  << "(" << grad_of_system.rows() << ", " << grad_of_system.cols() << ")" << "\n" << endl;
+    return grad_of_system;
+}
+
+
 // PVS-MPC Cost Function
 double costFunction(unsigned int n, const double *x, double *grad, void *data)
 {
@@ -976,16 +1055,50 @@ double costFunction(unsigned int n, const double *x, double *grad, void *data)
     traj_s.col(0) << ((opencv_moments[1] / opencv_moments[0]) - cu) / l, ((opencv_moments[2] / opencv_moments[0]) - cv) / l, log(sqrt(opencv_moments[0])), atan(2 * opencv_moments[11] / (opencv_moments[10] - opencv_moments[12]));
     traj_s_test.col(0) << transformed_s_bar_x, transformed_s_bar_y, transformed_sigma_square_log, transformed_tangent;
 
+    // cout << "log(sqrt(opencv_moments[0])) = " << log(sqrt(opencv_moments[0])) << endl;
+    // cout << "transformed_sigma_square_log = " << transformed_sigma_square_log << endl;
+
+    // cout << "transformed_features: " << transformed_features.transpose() << endl;
+    // cout << "transformed_polygon_features: " << transformed_polygon_features.transpose() << endl;
+
+    VectorXd optical_flow_estimate(transformed_features.size(),1);
+    optical_flow_estimate.setOnes(transformed_features.size(),1);
+    // cout << "optical_flow_estimate: " << optical_flow_estimate.transpose() << endl;
+    VectorXd mean_opt_flow_estimate = mean_final_opt_flow*optical_flow_estimate;
+    // cout << "mean_opt_flow_estimate: " << mean_opt_flow_estimate.transpose() << endl;
+
+    MatrixXd estimate_gains(dim_s,dim_s);
+    estimate_gains.setZero(dim_s,dim_s);
+    estimate_gains(0,0) = 1.0;
+    estimate_gains(1,1) = 1000.0;
+    // cout << "estimate_gains: " << estimate_gains << endl; 
+
     // Progate the model (PVS with Image Jacobian)
     for (int k = 0; k < mpc_hrz; k++)
     {
         VectorXd feat_prop = IBVSSystem(inputs.col(k));
         feature_hrz_prop.col(k + 1) = feature_hrz_prop.col(k) + feat_prop * mpc_dt;
         VectorXd sdot = Dynamic_System_x_y_reverted(inputs.col(k), feature_hrz_prop.col(k));
-
+        // cout << "\nsdot: " << sdot.transpose() << endl;
+        // cout << "Shape of sdot: " << "(" << sdot.rows() << ", " << sdot.cols() << ")" << endl;
         VectorXd sdot_test = img_moments_system(inputs.col(k), opencv_moments);
+        // cout << "transformed_features.size(): " << transformed_features.size() <<endl;
+        MatrixXd tracking_term = tracker_calculation();
+        
+        // cout << "tracking_term: \n" << tracking_term << endl;
+        // cout << "Shape of tracking_term: " << "(" << tracking_term.rows() << ", " << tracking_term.cols() << ")" << endl;
+        // cout << "mean_opt_flow_estimate: \n" << mean_opt_flow_estimate << endl;
+        // cout << "Shape of mean_opt_flow_estimate: " << "(" << mean_opt_flow_estimate.rows() << ", " << mean_opt_flow_estimate.cols() << ")" << endl;
 
-        traj_s.col(k + 1) = traj_s.col(k) + sdot_test * mpc_dt;
+        MatrixXd transpose_tracking_term = tracking_term.transpose();
+        // cout << "Shape of transpose_tracking_term: " << "(" << transpose_tracking_term.rows() << ", " << transpose_tracking_term.cols() << ")" << endl;
+        VectorXd final_estimation_without_mpc_dt = transpose_tracking_term*mean_opt_flow_estimate;
+        // cout << "final_estimation_without_mpc_dt: " << final_estimation_without_mpc_dt << endl;
+        // cout << "Shape of final_estimation_without_mpc_dt: " << "(" << final_estimation_without_mpc_dt.rows() << ", " << final_estimation_without_mpc_dt.cols() << ")" << endl;
+        // cout << "tracking_term.transpose()*mean_opt_flow: " << tracking_term*mean_opt_flow << endl;
+        // cout << "estimate_gains: " << estimate_gains << endl;         
+
+        traj_s.col(k + 1) = traj_s.col(k) + sdot_test * mpc_dt + estimate_gains*final_estimation_without_mpc_dt*mpc_dt;
         traj_s_test.col(k + 1) = traj_s_test.col(k) + sdot * mpc_dt;
     }
 
@@ -1403,6 +1516,16 @@ void altitudeCallback(const std_msgs::Float64::ConstPtr &alt_message)
     // printf("Relative altitude is (%g,%g,%g,%g) =", Z0, Z1, Z2, Z3);
 }
 
+//****UPDATE OPTICAL FLOW****//
+void ofCallback(const img_seg_cnn::Optical_flow_custom::ConstPtr &of_message)
+{
+    mean_opt_flow = of_message->mean_flow;
+    mean_final_opt_flow = of_message->mean_final_flow;    
+    // cout << "mean_opt_flow = " << mean_opt_flow << endl;
+    // cout << "mean_final_opt_flow = " << mean_final_opt_flow << endl;
+    flag = 1;    
+}
+
 //****MAIN****//
 int main(int argc, char **argv)
 {
@@ -1415,10 +1538,11 @@ int main(int argc, char **argv)
     ros::Subscriber feature_sub_poly_custom = nh.subscribe<img_seg_cnn::POLYcalc_custom>("/polycalc_custom", 10, featureCallback_poly_custom);
     ros::Subscriber feature_sub_poly_custom_tf = nh.subscribe<img_seg_cnn::POLYcalc_custom_tf>("/polycalc_custom_tf", 10, featureCallback_poly_custom_tf);
     ros::Subscriber alt_sub = nh.subscribe<std_msgs::Float64>("/mavros/global_position/rel_alt", 10, altitudeCallback);
+    ros::Subscriber of_sub = nh.subscribe<img_seg_cnn::Optical_flow_custom>("/optical_flow_output", 10, ofCallback);
 
     // Create subscribers
     ros::Publisher vel_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 1);
-    ros::Publisher rec_pub = nh.advertise<mpcpack::rec>("/mpcpack/msg/rec", 1);
+    ros::Publisher rec_pub = nh.advertise<vsc_nmpc_uav_target_tracking::rec>("/vsc_nmpc_uav_target_tracking/msg/rec", 1);
 
     // Initialize MPC Variables
     s_des.setZero(dim_s, mpc_hrz + 1);
@@ -1523,8 +1647,10 @@ optlabel:
     {
         double start = ros::Time::now().toSec();
         //***** OPTIMISATION TRIGGERING	******
-        cout << "Optimization Return Code: " << nlopt_optimize(opt, inputs, &minJ) << endl;
+        // cout << "\n" << endl;
+        cout << "Optimization Return Code: " << nlopt_optimize(opt, inputs, &minJ) << "\n" << endl;
         cout << "OPTIMIZATION WAS RUN" << endl;
+        cout << "\n" << endl;
         double end = ros::Time::now().toSec();
     }
 
@@ -1547,7 +1673,7 @@ optlabel:
         {
             // cout << "Ama den mpainei edw tha gamithoume" << endl;
             //****CREATE MESSAGE TO SAVE DATA****//
-            mpcpack::rec fdataMsg;
+            vsc_nmpc_uav_target_tracking::rec fdataMsg;
 
             //****START OF THE LOOP****//
             // cout << "NEW LOOP FOR m   = " << m << "   HAS STARTED" << endl;
@@ -1757,7 +1883,7 @@ optlabel:
                     //****EVENT-TRIGGERING CONDITION****//
                     // double first_Lzm2 = Lzm * (xk - xk_pred).squaredNorm();
                     // cout << "first Lzm2: " << first_Lzm2 << endl;
-                    double trigger_sigma = 15;
+                    double trigger_sigma = 15e5;
                     // cout << "trigger_sigma: " << trigger_sigma << endl;
                     double second_Lzm2 = Lzm * alt_ekm;
                     cout << "second Lzm2: " << second_Lzm2 << endl;
@@ -1781,6 +1907,8 @@ optlabel:
                         // cout << "fdataMsg.time: " << fdataMsg.time << endl;
                         trig = 5;
                         fdataMsg.trig = trig;
+                        // cout << "mean_opt_flow = " << mean_opt_flow << endl;
+                        // cout << "mean_final_opt_flow = " << mean_final_opt_flow << endl;
                         // fdataMsg.time = timer;
                         // optNum = nlopt_optimize(opt, inputs, &minJ);
                         goto optlabel;
@@ -1823,13 +1951,27 @@ optlabel:
             Tz = VelTrans1(VelTrans(caminputs))(2, 0);
             Oz = VelTrans1(VelTrans(caminputs))(5, 0);
 
-            dataMsg.velocity.x = (1.0) * Tx + 1.5;
+            double gain_tx;
+            nh.getParam("/gain_tx", gain_tx);
+            cout << "gain_tx: " << gain_tx << endl;
+            double gain_ty;
+            nh.getParam("/gain_ty", gain_ty);
+            cout << "gain_ty: " << gain_ty << endl;
+            double gain_tz;
+            nh.getParam("/gain_tz", gain_tz);
+            cout << "gain_tz: " << gain_tz << endl;
+            double gain_yaw;
+            nh.getParam("/gain_yaw", gain_yaw);
+            cout << "gain_yaw: " << gain_yaw << endl;
+
+            dataMsg.velocity.x = gain_tx * Tx + 1.5;
             // dataMsg.velocity.x = 0.0;
-            dataMsg.velocity.y = (0.5) * Ty;
+            dataMsg.velocity.y = gain_ty * Ty;
+            // dataMsg.velocity.y = (1.5) * Ty;
             // dataMsg.velocity.y = 0.0;
-            dataMsg.velocity.z = (1.0) * Tz;
+            dataMsg.velocity.z = gain_tz * Tz;
             // dataMsg.velocity.z = 0.0;
-            dataMsg.yaw_rate = (0.5) * Oz;
+            dataMsg.yaw_rate = gain_yaw * Oz;
             // dataMsg.yaw_rate = 0.0;
 
             // if (Tx >= 0.5)
@@ -1914,9 +2056,9 @@ optlabel:
             // cout << "\n"
             //      << endl;
 
-            // printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", dataMsg.velocity.x, dataMsg.velocity.y, dataMsg.velocity.z, dataMsg.yaw_rate);
-            // cout << "\n"
-            //      << endl;
+            printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", dataMsg.velocity.x, dataMsg.velocity.y, dataMsg.velocity.z, dataMsg.yaw_rate);
+            cout << "\n"
+                 << endl;
 
             rec_pub.publish(fdataMsg);
             vel_pub.publish(dataMsg);

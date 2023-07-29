@@ -6,7 +6,7 @@
 #include "img_seg_cnn/POLYcalc_custom_tf.h"
 #include "img_seg_cnn/Optical_flow_custom.h"
 #include "std_msgs/Float64.h"
-#include "mpcpack/rec.h"
+#include "vsc_nmpc_uav_target_tracking/rec.h"
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -1542,7 +1542,7 @@ int main(int argc, char **argv)
 
     // Create subscribers
     ros::Publisher vel_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 1);
-    ros::Publisher rec_pub = nh.advertise<mpcpack::rec>("/mpcpack/msg/rec", 1);
+    ros::Publisher rec_pub = nh.advertise<vsc_nmpc_uav_target_tracking::rec>("/vsc_nmpc_uav_target_tracking/msg/rec", 1);
 
     // Initialize MPC Variables
     s_des.setZero(dim_s, mpc_hrz + 1);
@@ -1673,7 +1673,7 @@ optlabel:
         {
             // cout << "Ama den mpainei edw tha gamithoume" << endl;
             //****CREATE MESSAGE TO SAVE DATA****//
-            mpcpack::rec fdataMsg;
+            vsc_nmpc_uav_target_tracking::rec fdataMsg;
 
             //****START OF THE LOOP****//
             // cout << "NEW LOOP FOR m   = " << m << "   HAS STARTED" << endl;

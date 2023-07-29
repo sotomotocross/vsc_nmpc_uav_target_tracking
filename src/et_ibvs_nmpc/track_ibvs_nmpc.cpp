@@ -3,7 +3,7 @@
 #include "mavros_msgs/PositionTarget.h"
 #include "img_seg_cnn/PREDdata.h"
 #include "std_msgs/Float64.h"
-#include "mpcpack/rec.h"
+#include "vsc_nmpc_uav_target_tracking/rec.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -566,7 +566,7 @@ int main (int argc, char **argv)
 
 	// Create subscribers
 	ros::Publisher vel_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 1);
-	ros::Publisher rec_pub = nh.advertise<mpcpack::rec>("/mpcpack/msg/rec", 1);
+	ros::Publisher rec_pub = nh.advertise<vsc_nmpc_uav_target_tracking::rec>("/vsc_nmpc_uav_target_tracking/msg/rec", 1);
 
 	//Initialize MPC Variables
 	s_des.setZero(dim_s,mpc_hrz+1);
@@ -738,7 +738,7 @@ int main (int argc, char **argv)
 		printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g) =", Tx, Ty, Tz, Oz);
 
       //****SAVE DATA****//
-	   mpcpack::rec fdataMsg;
+	   vsc_nmpc_uav_target_tracking::rec fdataMsg;
 
 	   fdataMsg.J = minJ;
 	   //   fdataMsg.optNUM = nlopt_optimize(opt, inputs, &minJ);

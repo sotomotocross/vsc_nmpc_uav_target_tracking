@@ -4,7 +4,7 @@
 #include "mavros_msgs/PositionTarget.h"
 #include "img_seg_cnn/PREDdata.h"
 #include "std_msgs/Float64.h"
-#include "mpcpack/rec.h"
+#include "vsc_nmpc_uav_target_tracking/rec.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -543,7 +543,7 @@ int main (int argc, char **argv)
 
         // Create subscribers
         ros::Publisher vel_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 1);
-        ros::Publisher rec_pub = nh.advertise<mpcpack::rec>("/mpcpack/msg/rec", 1);
+        ros::Publisher rec_pub = nh.advertise<vsc_nmpc_uav_target_tracking::rec>("/vsc_nmpc_uav_target_tracking/msg/rec", 1);
 
         //****INIATILIZE MPC VARIABLES****//
 	s_des.setZero(dim_s,mpc_hrz+1);
@@ -649,7 +649,7 @@ int main (int argc, char **argv)
 	
 
                 //****CREATE MESSAGE TO SAVE DATA****//
-                mpcpack::rec fdataMsg;
+                vsc_nmpc_uav_target_tracking::rec fdataMsg;
 
                 //****START OF THE LOOP****//
                 cout << "NEW LOOP FOR m   = " << m << "   HAS STARTED"<< endl;

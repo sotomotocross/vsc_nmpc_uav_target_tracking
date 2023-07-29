@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(mpcpack)
+project(vsc_nmpc_uav_target_tracking)
 
 # # Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -111,7 +111,7 @@ generate_messages(
 # # DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
       INCLUDE_DIRS include
-      LIBRARIES mpcpack
+      LIBRARIES vsc_nmpc_uav_target_tracking
       CATKIN_DEPENDS message_runtime geometry_msgs message_generation roscpp rospy std_msgs img_seg_cnn mavros mavros_msgs sensor_msgs
       DEPENDS system_lib eigen3
 )
@@ -208,218 +208,92 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 # # Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(stab_ibvs_nmpc src/stab_ibvs_nmpc.cpp)
+add_executable(stab_ibvs_nmpc src/et_ibvs_nmpc/stab_ibvs_nmpc.cpp)
 target_link_libraries(stab_ibvs_nmpc nlopt ${catkin_LIBRARIES})
 add_dependencies(stab_ibvs_nmpc
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
       ${catkin_EXPORTED_TARGETS}
       ${NLOPT_LIBRARIES}
       img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
-add_executable(track_ibvs_nmpc src/track_ibvs_nmpc.cpp)
+add_executable(track_ibvs_nmpc src/et_ibvs_nmpc/track_ibvs_nmpc.cpp)
 target_link_libraries(track_ibvs_nmpc nlopt ${catkin_LIBRARIES})
 add_dependencies(track_ibvs_nmpc
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
       ${catkin_EXPORTED_TARGETS}
       ${NLOPT_LIBRARIES}
       img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
-add_executable(et_stab_ibvs_nmpc src/et_stab_ibvs_nmpc.cpp)
+add_executable(et_stab_ibvs_nmpc src/et_ibvs_nmpc/et_stab_ibvs_nmpc.cpp)
 target_link_libraries(et_stab_ibvs_nmpc nlopt ${catkin_LIBRARIES})
 add_dependencies(et_stab_ibvs_nmpc
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
       ${catkin_EXPORTED_TARGETS}
       ${NLOPT_LIBRARIES}
       img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
-add_executable(et_track_ibvs_nmpc src/et_track_ibvs_nmpc.cpp)
+add_executable(et_track_ibvs_nmpc src/et_ibvs_nmpc/et_track_ibvs_nmpc.cpp)
 target_link_libraries(et_track_ibvs_nmpc nlopt ${catkin_LIBRARIES})
 add_dependencies(et_track_ibvs_nmpc
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
       ${catkin_EXPORTED_TARGETS}
       ${NLOPT_LIBRARIES}
       img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
-add_executable(et_tracking_pvs_barycenter_nmpc src/et_tracking_pvs_barycenter_nmpc.cpp)
-target_link_libraries(et_tracking_pvs_barycenter_nmpc nlopt ${catkin_LIBRARIES})
-add_dependencies(et_tracking_pvs_barycenter_nmpc
+add_executable(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version src/et_img_moments_nmpc/event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version.cpp)
+target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version nlopt ${catkin_LIBRARIES})
+add_dependencies(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
       ${catkin_EXPORTED_TARGETS}
       ${NLOPT_LIBRARIES}
       img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
-add_executable(tracking_pvs_barycenter_nmpc src/tracking_pvs_barycenter_nmpc.cpp)
-target_link_libraries(tracking_pvs_barycenter_nmpc nlopt ${catkin_LIBRARIES})
-add_dependencies(tracking_pvs_barycenter_nmpc
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(tracking_pvs_barycenter_nmpc_4_state_vars src/tracking_pvs_barycenter_nmpc_4_state_vars.cpp)
-target_link_libraries(tracking_pvs_barycenter_nmpc_4_state_vars nlopt ${catkin_LIBRARIES})
-add_dependencies(tracking_pvs_barycenter_nmpc_4_state_vars
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(pvs_nmpc_barycenter_6_dof_cam src/pvs_nmpc_barycenter_6_dof_cam.cpp)
-target_link_libraries(pvs_nmpc_barycenter_6_dof_cam nlopt ${catkin_LIBRARIES})
-add_dependencies(pvs_nmpc_barycenter_6_dof_cam
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(pvs_nmpc_barycenter_4_dof_cam_4_state_vars src/pvs_nmpc_barycenter_4_dof_cam_4_state_vars.cpp)
-target_link_libraries(pvs_nmpc_barycenter_4_dof_cam_4_state_vars nlopt ${catkin_LIBRARIES})
-add_dependencies(pvs_nmpc_barycenter_4_dof_cam_4_state_vars
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(pvs_nmpc_barycenter_4_dof_full_res_cam_4_state_vars src/pvs_nmpc_barycenter_4_dof_full_res_cam_4_state_vars.cpp)
-target_link_libraries(pvs_nmpc_barycenter_4_dof_full_res_cam_4_state_vars nlopt ${catkin_LIBRARIES})
-add_dependencies(pvs_nmpc_barycenter_4_dof_full_res_cam_4_state_vars
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(pvs_nmpc_barycenter_6_dof_cam_4_state_vars src/pvs_nmpc_barycenter_6_dof_cam_4_state_vars.cpp)
-target_link_libraries(pvs_nmpc_barycenter_6_dof_cam_4_state_vars nlopt ${catkin_LIBRARIES})
-add_dependencies(pvs_nmpc_barycenter_6_dof_cam_4_state_vars
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(pvs_nmpc_baryc_6_dof_6_state_vars src/pvs_nmpc_baryc_6_dof_6_state_vars.cpp)
-target_link_libraries(pvs_nmpc_baryc_6_dof_6_state_vars nlopt ${catkin_LIBRARIES})
-add_dependencies(pvs_nmpc_baryc_6_dof_6_state_vars
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(img_moments_ibvs_chaumette src/img_moments_ibvs_chaumette.cpp)
-target_link_libraries(img_moments_ibvs_chaumette nlopt ${catkin_LIBRARIES})
-add_dependencies(img_moments_ibvs_chaumette
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(uav_tracking_pvs_nmpc_with_img_moments_centroid src/uav_tracking_pvs_nmpc_with_img_moments_centroid.cpp)
-target_link_libraries(uav_tracking_pvs_nmpc_with_img_moments_centroid nlopt ${catkin_LIBRARIES})
-add_dependencies(uav_tracking_pvs_nmpc_with_img_moments_centroid
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(ibvs_img_moments_chaumette_coast_tracking src/uav_simulator/ibvs_img_moments_chaumette_coast_tracking.cpp)
-target_link_libraries(ibvs_img_moments_chaumette_coast_tracking nlopt ${catkin_LIBRARIES})
-add_dependencies(ibvs_img_moments_chaumette_coast_tracking
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(nmpc_img_moments_coast_tracking_with_cbf src/uav_simulator/nmpc_img_moments_coast_tracking_with_cbf.cpp)
-target_link_libraries(nmpc_img_moments_coast_tracking_with_cbf nlopt ${catkin_LIBRARIES})
-add_dependencies(nmpc_img_moments_coast_tracking_with_cbf
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(nmpc_img_moments_coast_tracking src/uav_simulator/nmpc_img_moments_coast_tracking.cpp)
-target_link_libraries(nmpc_img_moments_coast_tracking nlopt ${catkin_LIBRARIES})
-add_dependencies(nmpc_img_moments_coast_tracking
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(ibvs_img_moments_chaumette_target_tracking src/6_dof_cam_system/ibvs_img_moments_chaumette_target_tracking.cpp)
-target_link_libraries(ibvs_img_moments_chaumette_target_tracking nlopt ${catkin_LIBRARIES})
-add_dependencies(ibvs_img_moments_chaumette_target_tracking
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(nmpc_img_moments_target_tracking_with_cbf src/6_dof_cam_system/nmpc_img_moments_target_tracking_with_cbf.cpp)
-target_link_libraries(nmpc_img_moments_target_tracking_with_cbf nlopt ${catkin_LIBRARIES})
-add_dependencies(nmpc_img_moments_target_tracking_with_cbf
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(nmpc_img_moments_target_tracking src/6_dof_cam_system/nmpc_img_moments_target_tracking.cpp)
-target_link_libraries(nmpc_img_moments_target_tracking nlopt ${catkin_LIBRARIES})
-add_dependencies(nmpc_img_moments_target_tracking
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(ibvs_nmpc_testing_of_convergence src/ibvs_nmpc_testing_of_convergence.cpp)
-target_link_libraries(ibvs_nmpc_testing_of_convergence nlopt ${catkin_LIBRARIES})
-add_dependencies(ibvs_nmpc_testing_of_convergence
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(event_triggered_nmpc_img_moments_coast_tracking src/uav_simulator/event_triggered_nmpc_img_moments_coast_tracking.cpp)
-target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking nlopt ${catkin_LIBRARIES})
-add_dependencies(event_triggered_nmpc_img_moments_coast_tracking
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
-
-add_executable(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker src/uav_simulator/event_triggered_nmpc_img_moments_coast_tracking_OF_tracker.cpp)
+add_executable(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker src/et_img_moments_nmpc/event_triggered_nmpc_img_moments_coast_tracking_OF_tracker.cpp)
 target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker nlopt ${catkin_LIBRARIES})
 add_dependencies(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
       ${catkin_EXPORTED_TARGETS}
       ${NLOPT_LIBRARIES}
       img_seg_cnn_generate_messages_cpp
-      mpcpack_generate_messages_cpp)
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
-      add_executable(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version src/uav_simulator/event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version.cpp)
-      target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version nlopt ${catkin_LIBRARIES})
-      add_dependencies(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version
-            ${${PROJECT_NAME}_EXPORTED_TARGETS}
-            ${catkin_EXPORTED_TARGETS}
-            ${NLOPT_LIBRARIES}
-            img_seg_cnn_generate_messages_cpp
-            mpcpack_generate_messages_cpp)
+add_executable(event_triggered_nmpc_img_moments_coast_tracking src/et_img_moments_nmpc/event_triggered_nmpc_img_moments_coast_tracking.cpp)
+target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking nlopt ${catkin_LIBRARIES})
+add_dependencies(event_triggered_nmpc_img_moments_coast_tracking
+      ${${PROJECT_NAME}_EXPORTED_TARGETS}
+      ${catkin_EXPORTED_TARGETS}
+      ${NLOPT_LIBRARIES}
+      img_seg_cnn_generate_messages_cpp
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
+
+add_executable(ibvs_img_moments_chaumette_coast_tracking src/img_moments_nmpc/ibvs_img_moments_chaumette_coast_tracking.cpp)
+target_link_libraries(ibvs_img_moments_chaumette_coast_tracking nlopt ${catkin_LIBRARIES})
+add_dependencies(ibvs_img_moments_chaumette_coast_tracking
+      ${${PROJECT_NAME}_EXPORTED_TARGETS}
+      ${catkin_EXPORTED_TARGETS}
+      ${NLOPT_LIBRARIES}
+      img_seg_cnn_generate_messages_cpp
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
+
+add_executable(nmpc_img_moments_coast_tracking_with_cbf src/img_moments_nmpc/nmpc_img_moments_coast_tracking_with_cbf.cpp)
+target_link_libraries(nmpc_img_moments_coast_tracking_with_cbf nlopt ${catkin_LIBRARIES})
+add_dependencies(nmpc_img_moments_coast_tracking_with_cbf
+      ${${PROJECT_NAME}_EXPORTED_TARGETS}
+      ${catkin_EXPORTED_TARGETS}
+      ${NLOPT_LIBRARIES}
+      img_seg_cnn_generate_messages_cpp
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
+
+add_executable(nmpc_img_moments_coast_tracking src/img_moments_nmpc/nmpc_img_moments_coast_tracking.cpp)
+target_link_libraries(nmpc_img_moments_coast_tracking nlopt ${catkin_LIBRARIES})
+add_dependencies(nmpc_img_moments_coast_tracking
+      ${${PROJECT_NAME}_EXPORTED_TARGETS}
+      ${catkin_EXPORTED_TARGETS}
+      ${NLOPT_LIBRARIES}
+      img_seg_cnn_generate_messages_cpp
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
