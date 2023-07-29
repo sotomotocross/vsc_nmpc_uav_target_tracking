@@ -208,27 +208,10 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 # # Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(stab_ibvs_nmpc src/et_ibvs_nmpc/stab_ibvs_nmpc.cpp)
-target_link_libraries(stab_ibvs_nmpc nlopt ${catkin_LIBRARIES})
-add_dependencies(stab_ibvs_nmpc
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
 add_executable(track_ibvs_nmpc src/et_ibvs_nmpc/track_ibvs_nmpc.cpp)
 target_link_libraries(track_ibvs_nmpc nlopt ${catkin_LIBRARIES})
 add_dependencies(track_ibvs_nmpc
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
-
-add_executable(et_stab_ibvs_nmpc src/et_ibvs_nmpc/et_stab_ibvs_nmpc.cpp)
-target_link_libraries(et_stab_ibvs_nmpc nlopt ${catkin_LIBRARIES})
-add_dependencies(et_stab_ibvs_nmpc
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
       ${catkin_EXPORTED_TARGETS}
       ${NLOPT_LIBRARIES}
