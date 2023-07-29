@@ -629,11 +629,20 @@ int main(int argc, char **argv)
       Tz = VelTrans1(VelTrans(caminputs))(2, 0);
       Oz = VelTrans1(VelTrans(caminputs))(5, 0);
 
+      double gain_tx;
+      nh.getParam("/gain_tx", gain_tx);
+      double gain_ty;
+      nh.getParam("/gain_ty", gain_ty);
+      double gain_tz;
+      nh.getParam("/gain_tz", gain_tz);
+      double gain_yaw;
+      nh.getParam("/gain_yaw", gain_yaw);
+
       // Τracking tuning
-      dataMsg.velocity.x = (0.01) * Tx + 0.08;
-      dataMsg.velocity.y = (-0.08) * Ty;
-      dataMsg.velocity.z = (0.0008) * Tz;
-      dataMsg.yaw_rate = (-0.08) * Oz;
+      dataMsg.velocity.x = gain_tx * Tx + 0.08;
+      dataMsg.velocity.y = gain_ty * Ty;
+      dataMsg.velocity.z = gain_tz * Tz;
+      dataMsg.yaw_rate = gain_yaw * Oz;
 
       // Stabilization tuning
       // dataMsg.velocity.x = 0.0;

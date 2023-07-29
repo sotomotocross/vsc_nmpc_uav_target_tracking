@@ -1,5 +1,0 @@
-<launch>
-
-   <node pkg="mpcpack" type="uav_tracking_pvs_nmpc_with_img_moments_centroid" respawn="false" name="uav_tracking_pvs_nmpc_with_img_moments_centroid" output="screen"  launch-prefix="gdb --args" /> 
-
-</launch> 

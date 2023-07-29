@@ -244,15 +244,6 @@ add_dependencies(et_track_ibvs_nmpc
       img_seg_cnn_generate_messages_cpp
       vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
-add_executable(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version src/et_img_moments_nmpc/event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version.cpp)
-target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version nlopt ${catkin_LIBRARIES})
-add_dependencies(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version
-      ${${PROJECT_NAME}_EXPORTED_TARGETS}
-      ${catkin_EXPORTED_TARGETS}
-      ${NLOPT_LIBRARIES}
-      img_seg_cnn_generate_messages_cpp
-      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
-
 add_executable(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker src/et_img_moments_nmpc/event_triggered_nmpc_img_moments_coast_tracking_OF_tracker.cpp)
 target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker nlopt ${catkin_LIBRARIES})
 add_dependencies(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker
@@ -271,9 +262,9 @@ add_dependencies(event_triggered_nmpc_img_moments_coast_tracking
       img_seg_cnn_generate_messages_cpp
       vsc_nmpc_uav_target_tracking_generate_messages_cpp)
 
-add_executable(ibvs_img_moments_chaumette_coast_tracking src/img_moments_nmpc/ibvs_img_moments_chaumette_coast_tracking.cpp)
-target_link_libraries(ibvs_img_moments_chaumette_coast_tracking nlopt ${catkin_LIBRARIES})
-add_dependencies(ibvs_img_moments_chaumette_coast_tracking
+add_executable(ibvs_img_moments_coast_tracking src/img_moments_nmpc/ibvs_img_moments_coast_tracking.cpp)
+target_link_libraries(ibvs_img_moments_coast_tracking nlopt ${catkin_LIBRARIES})
+add_dependencies(ibvs_img_moments_coast_tracking
       ${${PROJECT_NAME}_EXPORTED_TARGETS}
       ${catkin_EXPORTED_TARGETS}
       ${NLOPT_LIBRARIES}

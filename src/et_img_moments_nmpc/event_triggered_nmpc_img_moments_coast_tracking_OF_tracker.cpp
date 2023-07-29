@@ -1883,7 +1883,9 @@ optlabel:
                     //****EVENT-TRIGGERING CONDITION****//
                     // double first_Lzm2 = Lzm * (xk - xk_pred).squaredNorm();
                     // cout << "first Lzm2: " << first_Lzm2 << endl;
-                    double trigger_sigma = 15e5;
+                    double trigger_sigma;
+                    nh.getParam("/trigger_sigma", trigger_sigma);
+                    // double trigger_sigma = 15e5;
                     // cout << "trigger_sigma: " << trigger_sigma << endl;
                     double second_Lzm2 = Lzm * alt_ekm;
                     cout << "second Lzm2: " << second_Lzm2 << endl;
@@ -1951,14 +1953,27 @@ optlabel:
             Tz = VelTrans1(VelTrans(caminputs))(2, 0);
             Oz = VelTrans1(VelTrans(caminputs))(5, 0);
 
-            dataMsg.velocity.x = (1.0) * Tx + 1.5;
+            double gain_tx;
+            nh.getParam("/gain_tx", gain_tx);
+            // cout << "gain_tx: " << gain_tx << endl;
+            double gain_ty;
+            nh.getParam("/gain_ty", gain_ty);
+            // cout << "gain_ty: " << gain_ty << endl;
+            double gain_tz;
+            nh.getParam("/gain_tz", gain_tz);
+            // cout << "gain_tz: " << gain_tz << endl;
+            double gain_yaw;
+            nh.getParam("/gain_yaw", gain_yaw);
+            // cout << "gain_yaw: " << gain_yaw << endl;
+
+            dataMsg.velocity.x = gain_tx * Tx + 1.5;
             // dataMsg.velocity.x = 0.0;
-            dataMsg.velocity.y = (1.5) * Ty;
+            dataMsg.velocity.y = gain_ty * Ty;
             // dataMsg.velocity.y = (1.5) * Ty;
             // dataMsg.velocity.y = 0.0;
-            dataMsg.velocity.z = (1.0) * Tz;
+            dataMsg.velocity.z = gain_tz * Tz;
             // dataMsg.velocity.z = 0.0;
-            dataMsg.yaw_rate = (0.8) * Oz;
+            dataMsg.yaw_rate = gain_yaw * Oz;
             // dataMsg.yaw_rate = 0.0;
 
             // if (Tx >= 0.5)

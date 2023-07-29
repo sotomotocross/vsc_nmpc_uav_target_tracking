@@ -1,6 +1,0 @@
-<launch>
-
-   <node pkg="mpcpack" type="event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version" name="event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_param_version" output="screen" /> 
-    <rosparam command="load" name="parameters_of_control" file="$(find mpcpack)/config/nmpc_parameters.yaml" />
-
-</launch> 

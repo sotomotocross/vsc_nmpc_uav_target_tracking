@@ -308,7 +308,7 @@ VectorXd barrier_function_calculation()
    double dist_area_des = min(abs(5.0 - sigma_lb), abs(5.0 - sigma_ub));
    // cout << "dist_area_des: " << dist_area_des << endl;
    // cout << "b = " << b << endl;
-   
+
    if (dist_area <= b)
    {
       // cout << "Mikrotero apo b!!!" << endl;
@@ -368,7 +368,7 @@ VectorXd barrier_function_calculation()
 
    VectorXd barrier_function(2);
    barrier_function.setZero(2);
-   
+
    stored_barrier_function.setZero(2);
    stored_barrier_function << reversed_b_1, reversed_b_2;
    // cout << "stored_barrier_function: " << stored_barrier_function.transpose() << endl;
@@ -1570,28 +1570,25 @@ startlabel:
          Tz = VelTrans1(VelTrans(caminputs))(2, 0);
          Oz = VelTrans1(VelTrans(caminputs))(5, 0);
 
-         // dataMsg.velocity.x = (1.0)*Tx+1.0;
-         // dataMsg.velocity.y = (3.8)*Ty;
-         // dataMsg.velocity.z = (1.0)*Tz;
-         // dataMsg.yaw_rate = (12.0)*Oz;
+         double gain_tx;
+         nh.getParam("/gain_tx", gain_tx);
+         double gain_ty;
+         nh.getParam("/gain_ty", gain_ty);
+         double gain_tz;
+         nh.getParam("/gain_tz", gain_tz);
+         double gain_yaw;
+         nh.getParam("/gain_yaw", gain_yaw);
 
-         // dataMsg.velocity.x = (1.0) * Tx + 2.5;
-         // dataMsg.velocity.x = 0.0;
-         // dataMsg.velocity.y = (0.8) * Ty;
-         // dataMsg.velocity.z = (1.0) * Tz;
-         // dataMsg.yaw_rate = (2.5) * Oz;
-
-         dataMsg.velocity.x = (1.0) * Tx + 2.5;
-         // dataMsg.velocity.x = 0.0;
-         dataMsg.velocity.y = (1.0) * Ty;
-         dataMsg.velocity.z = (2.0) * Tz;
-         dataMsg.yaw_rate = (1.0) * Oz;
+         // Τracking tuning
+         dataMsg.velocity.x = gain_tx * Tx + 2.5;
+         dataMsg.velocity.y = gain_ty * Ty;
+         dataMsg.velocity.z = gain_tz * Tz;
+         dataMsg.yaw_rate = gain_yaw * Oz;
 
          // dataMsg.velocity.x = 0.0;
          // dataMsg.velocity.y = 0.0;
          // dataMsg.velocity.z = -0.07;
          // dataMsg.yaw_rate = 0.0;
-
 
          // if (Tx >= 0.5)
          // {
@@ -1621,7 +1618,7 @@ startlabel:
          // cout << "\n" << endl;
          // printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", Tx, Ty, Tz, Oz);
          // cout << "\n"
-            //   << endl;
+         //   << endl;
 
          //****SAVE DATA****//
          vsc_nmpc_uav_target_tracking::rec fdataMsg;
@@ -1676,7 +1673,7 @@ startlabel:
 
          printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", fdataMsg.Tx, fdataMsg.Ty, fdataMsg.Tz, fdataMsg.Oz);
          cout << "\n"
-           << endl;
+              << endl;
 
          std_msgs::Float64MultiArray stored_barrier_function_Msg;
          for (int i = 0; i < stored_barrier_function.size(); i++)

@@ -1537,27 +1537,20 @@ startlabel:
          Tz = VelTrans1(VelTrans(caminputs))(2, 0);
          Oz = VelTrans1(VelTrans(caminputs))(5, 0);
 
-         // dataMsg.velocity.x = (1.0)*Tx+1.0;
-         // dataMsg.velocity.y = (3.8)*Ty;
-         // dataMsg.velocity.z = (1.0)*Tz;
-         // dataMsg.yaw_rate = (12.0)*Oz;
+         double gain_tx;
+         nh.getParam("/gain_tx", gain_tx);
+         double gain_ty;
+         nh.getParam("/gain_ty", gain_ty);
+         double gain_tz;
+         nh.getParam("/gain_tz", gain_tz);
+         double gain_yaw;
+         nh.getParam("/gain_yaw", gain_yaw);
 
-         // dataMsg.velocity.x = (1.0) * Tx + 2.5;
-         // dataMsg.velocity.x = 0.0;
-         // dataMsg.velocity.y = (0.8) * Ty;
-         // dataMsg.velocity.z = (1.0) * Tz;
-         // dataMsg.yaw_rate = (2.5) * Oz;
-
-         // dataMsg.velocity.x = (1.0) * Tx + 1.5;
-         // dataMsg.velocity.x = 0.0;
-         // dataMsg.velocity.y = (0.5) * Ty;
-         // dataMsg.velocity.z = (1.0) * Tz;
-         // dataMsg.yaw_rate = (0.5) * Oz;
-
-         dataMsg.velocity.x = 0.0;
-         dataMsg.velocity.y = 0.0;
-         dataMsg.velocity.z = 0.0;
-         dataMsg.yaw_rate = 0.0;
+         // Τracking tuning
+         dataMsg.velocity.x = gain_tx * Tx + 1.5;
+         dataMsg.velocity.y = gain_ty * Ty;
+         dataMsg.velocity.z = gain_tz * Tz;
+         dataMsg.yaw_rate = gain_yaw * Oz;
 
          // if (Tx >= 0.5)
          // {

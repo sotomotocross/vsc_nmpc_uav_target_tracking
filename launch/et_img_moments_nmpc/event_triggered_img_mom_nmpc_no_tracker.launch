@@ -1,0 +1,6 @@
+<launch>
+
+   <node pkg="vsc_nmpc_uav_target_tracking" type="event_triggered_nmpc_img_moments_coast_tracking" name="event_triggered_nmpc_img_moments_coast_tracking" output="screen" /> 
+    <rosparam command="load" name="parameters_of_control" file="$(find vsc_nmpc_uav_target_tracking)/config/et_img_moments_nmpc_parameters.yaml" />
+
+</launch> 

@@ -2,3 +2,4 @@ gain_tx: 1.0
 gain_ty: 1.5
 gain_tz: 1.0
 gain_yaw: 0.8
+trigger_sigma: 15.0e5
