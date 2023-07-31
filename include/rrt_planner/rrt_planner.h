@@ -12,8 +12,207 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "geometry_msgs/Twist.h"
+#include "mavros_msgs/PositionTarget.h"
+#include "img_seg_cnn/PREDdata.h"
+#include "img_seg_cnn/POLYcalc_custom.h"
+#include "img_seg_cnn/POLYcalc_custom_tf.h"
+#include "std_msgs/Float64.h"
+#include "rrt_planner/rec.h"
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <stdio.h>
+#include <math.h>
+#include <cmath>
+#include <nlopt.hpp>
+#include <eigen3/Eigen/Dense>
+
+// Distance definition for CBF
+#include <bits/stdc++.h>
+// To store the point
+#define Point_blank pair<double, double>
+#define F first
+#define S second
+
+using namespace std;
+using namespace Eigen;
+
+
 namespace rrt_planner
 {
+
+  class NMPC_algorithm{
+    public:
+      explicit NMPC_algorithm(ros::NodeHandle *);
+        ~NMPC_algorithm() = default;
+
+      //****UPDATE IMAGE FEATURE COORDINATES****//
+      void featureCallback_poly_custom(const img_seg_cnn::POLYcalc_custom::ConstPtr &s_message);
+
+      //****UPDATE IMAGE FEATURE COORDINATES****//
+      void featureCallback_poly_custom_tf(const img_seg_cnn::POLYcalc_custom_tf::ConstPtr &s_message);
+
+      //****UPDATE ALTITUDE****//
+      void altitudeCallback(const std_msgs::Float64::ConstPtr &alt_message);
+
+    private:
+      // distance between two 2D points
+      double distance(double x1, double y1, double x2, double y2);
+      
+      // distance between a point and a line segment
+      double distance(double px, double py, double x1, double y1, double x2, double y2, double &projx, double &projy);
+      
+      // distance between a point and a polygon
+      double distance(double px, double py, const vector<pair<double, double>> &polygon, double &closestx, double &closesty);
+
+      // Function to return the minimum distance
+      // between a line segment AB and a point E
+      double minDistance(Point_blank A, Point_blank B, Point_blank E);
+
+      double state_bar_fnct_calc(VectorXd camTwist);
+
+      VectorXd barrier_function_calculation();
+
+      VectorXd calculate_moments(VectorXd feat_u, VectorXd feat_v);
+
+      VectorXd calculate_central_moments(VectorXd moments);
+
+      VectorXd img_moments_system(VectorXd camTwist, VectorXd moments);
+
+      VectorXd Dynamic_System_x_y_reverted(VectorXd camTwist, VectorXd feat_prop);
+
+      // Camera-UAV Velocity Transform VelUAV
+      MatrixXd VelTrans(MatrixXd CameraVel);
+
+      // Camera-UAV Velocity Transform VelUAV
+      MatrixXd VelTrans1(MatrixXd CameraVel1);
+
+      // IBVS Feature Rate Le*Vk
+      VectorXd IBVSSystem(VectorXd camTwist);
+
+      // Image-moments-like NMPC Cost Function
+      double costFunction(unsigned int n, const double *x, double *grad, void *data);
+
+      // Image-moments-like NMPC Cost Function alternative
+      double costFunction_alter(unsigned int n, const double *x, double *grad, void *data);
+
+      //****DEFINE FOV CONSTRAINTS****//
+      void constraints(unsigned int m, double *c, unsigned int n, const double *x, double *grad, void *data);
+
+      ros::NodeHandle * nh_;
+      ros::NodeHandle private_nh_;
+    
+      ros::Subscriber feature_sub_poly_custom;
+      ros::Subscriber feature_sub_poly_custom_tf;
+      ros::Subscriber alt_sub;
+
+      // Create subscribers
+      ros::Publisher vel_pub;
+      ros::Publisher rec_pub;
+
+      /**
+       * Utility parameters from the node server
+       */
+      double cX, cY;
+      int cX_int, cY_int;
+
+      //  int features_n = 4;
+      int features_n = 1;
+      int dim_inputs = 4;
+      int dim_s = 4;
+      int mpc_hrz = 10; // 10
+      double mpc_dt = 0.001;  // 0.001
+      double l = 252.07;
+      double a = 10;
+      double optNum;
+
+      MatrixXd s_des;
+      // MatrixXd s_des(dim_s, mpc_hrz + 1);
+      
+      VectorXd stored_s_des;
+      // VectorXd stored_s_des(dim_s);
+      
+      VectorXd stored_traj_s;
+      // VectorXd stored_traj_s(dim_s);
+      
+      MatrixXd s_des_test;
+      // MatrixXd s_des_test(dim_s, mpc_hrz + 1);
+      
+      VectorXd s_ub;
+      // VectorXd s_ub(dim_s);
+      
+      VectorXd s_lb;
+      // VectorXd s_lb(dim_s);
+      
+      VectorXd s_abs;
+      // VectorXd s_abs(dim_s);
+      
+      VectorXd s_bc;
+      VectorXd s_br;
+      MatrixXd Q;
+      MatrixXd R;
+      MatrixXd P;
+      MatrixXd gains;
+      VectorXd t;
+      VectorXd ek;
+      VectorXd ek_1;
+      VectorXd feature_vector;
+      VectorXd transformed_features;
+      VectorXd opencv_moments;
+      MatrixXd polygon_features;
+      MatrixXd transformed_polygon_features;
+
+      // Simulator camera parameters
+      double umax = 720;
+      double umin = 0;
+      double vmax = 480;
+      double vmin = 0;
+      double cu = 360.5;
+      double cv = 240.5;
+
+      int flag = 0;
+
+      // Camera Frame Update Callback Variables
+      double Z0, Z1, Z2, Z3;
+      double Tx, Ty, Tz, Oz;
+
+      double s_bar_x, s_bar_y;
+      double first_min_index, second_min_index;
+      double custom_sigma, custom_sigma_square, custom_sigma_square_log;
+      double angle_tangent, angle_radian, angle_deg;
+
+      double transformed_s_bar_x, transformed_s_bar_y;
+      double transformed_first_min_index, transformed_second_min_index;
+      double transformed_sigma, transformed_sigma_square, transformed_sigma_square_log;
+      double transformed_tangent, transformed_angle_radian, transformed_angle_deg;
+
+      double s_bar_x_des = Z0 * (cu - cu / l);
+      double s_bar_y_des = Z0 * (cv - cv / l);
+
+      // double sigma_des = 18500.0;
+      double sigma_des = 18.5;
+      double sigma_square_des = sqrt(sigma_des);
+      double sigma_log_des = log(sigma_square_des);
+
+      double angle_deg_des = 0;
+      double angle_des_tan = tan((angle_deg_des / 180) * 3.14);
+
+      // double sigma_constraints = 25000.0;
+      double sigma_constraints = 25.0;
+      double sigma_constraints_square = sqrt(sigma_constraints);
+      double sigma_constraints_square_log = log(sigma_constraints_square);
+
+      double angle_deg_constraint = 45;
+      double angle_deg_constraint_tan = tan((angle_deg_constraint / 180) * 3.14);
+
+      double gain_tx_;
+      double gain_ty_;
+      double gain_tz_;
+      double gain_yaw_;
+
+  };
 
 /**
  * A utility class to represent a 2D point

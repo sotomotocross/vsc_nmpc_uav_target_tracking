@@ -4,14 +4,47 @@
   <version>0.0.0</version>
   <description>The rrt_planner package</description>
 
-  <maintainer email="sarthak@polybee.co">Sarthak Mittal</maintainer>
+  <maintainer email="s.aspragkathos@gmail.com">sotomotocross</maintainer>
   <license>TODO</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>nav_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>roscpp</depend>
+
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>message_runtime</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>img_seg_cnn</build_depend>
+  <build_depend>mavros_msgs</build_depend>
+  <build_depend>mavros</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>img_seg_cnn</build_export_depend>
+  <build_export_depend>message_generation</build_export_depend>
+  <build_export_depend>message_runtime</build_export_depend> 
+  <build_export_depend>mavros_msgs</build_export_depend>
+  <build_export_depend>mavros</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+
+
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>img_seg_cnn</exec_depend>
+  <exec_depend>message_generation</exec_depend>
+  <exec_depend>message_runtime</exec_depend>  
+  <exec_depend>eigen3</exec_depend>
+  <exec_depend>mavros_msgs</exec_depend>
+  <exec_depend>mavros</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
 
   <export>
   </export>

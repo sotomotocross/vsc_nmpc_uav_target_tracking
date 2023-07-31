@@ -1,0 +1,8 @@
+<launch>
+    
+    <rosparam command="load" file="$(find rrt_planner)/cfg/config.yaml"/>
+    <rosparam command="load" file="$(find rrt_planner)/cfg/ibvs_img_moments.yaml" />
+
+    <node type="rrt_planner_node" name="rrt_planner" pkg="rrt_planner" output="screen"/>\
+    <!-- <node type="ibvs_img_moments_coast_tracking" name="ibvs_img_moments_coast_tracking" pkg="vsc_nmpc_uav_target_tracking" output="screen" />  -->
+</launch>
