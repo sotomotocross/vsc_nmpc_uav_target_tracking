@@ -43,3 +43,5 @@ This is the core of an under submission/review publication.
 ## References
 <a id="1">[1]</a> 
 S. N. Aspragkathos, M. Sinani, G. C. Karras, and K. J. Kyriakopoulos, “An Event-triggered Visual Servoing Predictive Control Strategy for the Surveillance of Contour-based Areas using Multirotor Aerial Vehicles", in IEEE/RSJ 2022 International Conference on Intelligent Robots and Systems (IROS), IEEE, 2022, pp. 375–381, IEEE, 2022, [10.1109/IROS47612.2022.9981176](10.1109/IROS47612.2022.9981176)
+<a id="2">[2]</a> 
+S. N. Aspragkathos, G. C. Karras and K. J. Kyriakopoulos, "Event-Triggered Image Moments Predictive Control for Tracking Evolving Features Using UAVs," in IEEE Robotics and Automation Letters, vol. 9, no. 2, pp. 1019-1026, Feb. 2024, doi: 10.1109/LRA.2023.3339064.)
