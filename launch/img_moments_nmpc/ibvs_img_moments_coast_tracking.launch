@@ -1,6 +1,5 @@
 <launch>
-
-   <node pkg="vsc_nmpc_uav_target_tracking" type="event_triggered_nmpc_img_moments_coast_tracking_OF_tracker" name="event_triggered_nmpc_img_moments_coast_tracking_OF_tracker" output="screen" /> 
-    <rosparam command="load" name="parameters_of_control" file="$(find vsc_nmpc_uav_target_tracking)/config/nmpc_img_moments_parameters.yaml" />
-
-</launch> 
+    <node name="vsc_nmpc_uav_target_tracking" pkg="vsc_nmpc_uav_target_tracking" type="vsc_nmpc_uav_target_tracking_node" output="screen">
+        <!-- <rosparam file="$(find vsc_nmpc_uav_target_tracking)/config/ibvs_img_moments.yaml" /> -->
+    </node>
+</launch>

@@ -271,3 +271,21 @@ add_dependencies(nmpc_img_moments_coast_tracking
       ${NLOPT_LIBRARIES}
       img_seg_cnn_generate_messages_cpp
       vsc_nmpc_uav_target_tracking_generate_messages_cpp)
+
+add_executable(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_with_bfs src/et_img_moments_nmpc/event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_with_bfs.cpp)
+target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_with_bfs nlopt ${catkin_LIBRARIES})
+add_dependencies(event_triggered_nmpc_img_moments_coast_tracking_OF_tracker_with_bfs
+      ${${PROJECT_NAME}_EXPORTED_TARGETS}
+      ${catkin_EXPORTED_TARGETS}
+      ${NLOPT_LIBRARIES}
+      img_seg_cnn_generate_messages_cpp
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)
+      
+add_executable(event_triggered_nmpc_img_moments_coast_tracking_with_bfs src/et_img_moments_nmpc/event_triggered_nmpc_img_moments_coast_tracking_with_bfs.cpp)
+target_link_libraries(event_triggered_nmpc_img_moments_coast_tracking_with_bfs nlopt ${catkin_LIBRARIES})
+add_dependencies(event_triggered_nmpc_img_moments_coast_tracking_with_bfs
+      ${${PROJECT_NAME}_EXPORTED_TARGETS}
+      ${catkin_EXPORTED_TARGETS}
+      ${NLOPT_LIBRARIES}
+      img_seg_cnn_generate_messages_cpp
+      vsc_nmpc_uav_target_tracking_generate_messages_cpp)

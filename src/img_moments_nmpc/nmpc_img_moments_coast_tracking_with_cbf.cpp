@@ -635,7 +635,14 @@ VectorXd Dynamic_System_x_y_reverted(VectorXd camTwist, VectorXd feat_prop)
    double term_2_5 = 0.0;
 
    int N;
-   N = transformed_features.size() / 2;
+   // N = transformed_features.size() / 2;
+   N = feat_prop.size() / 2;
+   // cout << "\nN = " << N << endl;
+
+   int first = transformed_first_min_index;
+   int second = transformed_second_min_index;
+   // cout << "first = " << first << endl;
+   // cout << "second = " << second << endl;
    //    cout << "feat_prop: \n" << feat_prop << endl;
    //    cout << "feat_prop[0]: " << feat_prop[0] << endl;
    // cout << "transformed_features: \n"
@@ -643,6 +650,9 @@ VectorXd Dynamic_System_x_y_reverted(VectorXd camTwist, VectorXd feat_prop)
    //    cout << "transformed_features[0]: " << transformed_features[0] << endl;
    //    cout << "length feature vector: " << transformed_features.size() << "\n" << endl;
    //    cout << "length feat_prop vector: " << feat_prop.size() << "\n" << endl;
+
+   // cout << "first_min_index = " << first_min_index << endl;
+   // cout << "second_min_index = " << second_min_index << endl;
 
    for (int i = 0; i < N - 1; i += 2)
    {
@@ -691,7 +701,7 @@ VectorXd Dynamic_System_x_y_reverted(VectorXd camTwist, VectorXd feat_prop)
 
    //    cout << "x: " << x.transpose() << endl;
    //    cout << "y: " << y.transpose() << endl;
-
+   // cout << "term_4_4" << endl;
    for (int i = 0; i < N - 1; i += 2)
    {
       //   cout << "2nd Vector Index: " << i << "\n" << endl;
@@ -700,18 +710,37 @@ VectorXd Dynamic_System_x_y_reverted(VectorXd camTwist, VectorXd feat_prop)
       sum_4_4_2 = sum_4_4_2 + feat_prop[i] * feat_prop[i + 1];
    }
 
+   // cout << "x[transformed_second_min_index] = " << x[transformed_second_min_index] << endl;
+   // cout << "y[transformed_second_min_index] = " << y[transformed_second_min_index] << endl;
+
+   // cout << "term_4_4 loop completed" << endl;
+
+   // cout << "x[transformed_first_min_index] = " << x[transformed_first_min_index] << endl;
+   // cout << "y[transformed_first_min_index] = " << y[transformed_first_min_index] << endl;
+   // cout << "x[transformed_second_min_index] = " << x[transformed_second_min_index] << endl;
+   // cout << "y[transformed_second_min_index] = " << y[transformed_second_min_index] << endl;
+
+   // cout << "y[transformed_first_min_index] + y[transformed_second_min_index] - 2 * transformed_s_bar_y = " << y[transformed_first_min_index] + y[transformed_second_min_index] - 2 * transformed_s_bar_y << endl;
+
    term_4_4_1 = transformed_tangent / (y[transformed_first_min_index] + y[transformed_second_min_index] - 2 * transformed_s_bar_y);
+   // cout << "term_4_4_1 = " << term_4_4_1 << endl;
    term_4_4_2 = (pow(y[transformed_first_min_index], 2) + pow(y[transformed_second_min_index], 2) - (2 / N) * sum_4_4_1);
+   // cout << "term_4_4_2 = " << term_4_4_2 << endl;
    term_4_4_3 = -1 / (y[transformed_first_min_index] + y[transformed_second_min_index] - 2 * transformed_s_bar_y);
+   // cout << "term_4_4_3 = " << term_4_4_3 << endl;
    term_4_4_4 = (x[transformed_first_min_index] * y[transformed_first_min_index] + x[transformed_second_min_index] * y[transformed_second_min_index] - (2 / N) * sum_4_4_2);
+   // cout << "term_4_4_4 = " << term_4_4_4 << endl;
 
    g_4_4 = term_4_4_1 * term_4_4_2 + term_4_4_3 * term_4_4_4;
-   //    cout << "g_4_4: " << g_4_4 << endl;
+   // cout << "g_4_4 = " << g_4_4 << endl;
+
+   // cout << "g_4_4 calculated\n" << endl;
 
    // Fifth term
    double term_4_5_1, term_4_5_2, term_4_5_3, term_4_5_4;
    double sum_4_5_1 = 0.0, sum_4_5_2 = 0.0;
 
+   // cout << "term_4_5" << endl;
    for (int i = 0; i < N - 1; i += 2)
    {
       //   cout << "3rd Vector Index: " << i << "\n" << endl;
@@ -720,13 +749,31 @@ VectorXd Dynamic_System_x_y_reverted(VectorXd camTwist, VectorXd feat_prop)
       sum_4_5_2 = sum_4_5_2 + feat_prop[i] * feat_prop[i + 1];
    }
 
+   // cout << "x[transformed_second_min_index] = " << x[transformed_second_min_index] << endl;
+   // cout << "y[transformed_second_min_index] = " << y[transformed_second_min_index] << endl;
+
+   // cout << "term_4_5 loop completed" << endl;
+
+   // cout << "x[transformed_first_min_index] = " << x[transformed_first_min_index] << endl;
+   // cout << "y[transformed_first_min_index] = " << y[transformed_first_min_index] << endl;
+   // cout << "x[transformed_second_min_index] = " << x[transformed_second_min_index] << endl;
+   // cout << "y[transformed_second_min_index] = " << y[transformed_second_min_index] << endl;
+
+   // cout << "(y[transformed_first_min_index] + y[transformed_second_min_index] - 2 * transformed_s_bar_y) = " << (y[transformed_first_min_index] + y[transformed_second_min_index] - 2 * transformed_s_bar_y) << endl;
+
    term_4_5_1 = 1 / (y[transformed_first_min_index] + y[transformed_second_min_index] - 2 * transformed_s_bar_y);
+   // cout << "term_4_5_1 = " << term_4_5_1 << endl;
    term_4_5_2 = (pow(x[transformed_first_min_index], 2) + pow(x[transformed_second_min_index], 2) - (2 / N) * sum_4_5_1);
+   // cout << "term_4_5_2 = " << term_4_5_2 << endl;
    term_4_5_3 = -transformed_tangent / (y[transformed_first_min_index] + y[transformed_second_min_index] - 2 * transformed_s_bar_y);
+   // cout << "term_4_5_3 = " << term_4_5_3 << endl;
    term_4_5_4 = (x[transformed_first_min_index] * y[transformed_first_min_index] + x[transformed_second_min_index] * y[transformed_second_min_index] - (2 / N) * sum_4_5_2);
+   // cout << "term_4_5_4 = " << term_4_5_4 << endl;
 
    g_4_5 = term_4_5_1 * term_4_5_2 + term_4_5_3 * term_4_5_4;
-   //    cout << "g_4_5: " << g_4_5 << endl;
+   // cout << "g_4_5: " << g_4_5 << endl;
+
+   // cout << "g_4_5 calculated" << endl;
 
    // Fifth term
    g_4_6 = pow(transformed_tangent, 2) + 1;
@@ -1049,6 +1096,7 @@ double costFunction(unsigned int n, const double *x, double *grad, void *data)
    // cout << "Jt: \n" << Jt << endl;
 
    Jt = et.transpose() * P * et;
+   Jt_1 = et_1.transpose() * P * et_1;
    //   cout << "Ji = " << Ji << " + " << "Jt = " << Jt << endl;\
 
    VectorXd bar_fnct = barrier_function_calculation();
@@ -1094,7 +1142,8 @@ double costFunction(unsigned int n, const double *x, double *grad, void *data)
    // stored_barrier_function = bar_fnct;
    stored_state_bar_function = state_bar_fnct;
 
-   return Ji + Jt + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
+   // return Ji + Jt + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
+   return Ji_1 + Jt_1 + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
 }
 
 // PVS-MPC Cost Function
@@ -1671,7 +1720,8 @@ startlabel:
          fdataMsg.time = timer;
          fdataMsg.dtloop = dt;
 
-         printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", fdataMsg.Tx, fdataMsg.Ty, fdataMsg.Tz, fdataMsg.Oz);
+         // printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", fdataMsg.Tx, fdataMsg.Ty, fdataMsg.Tz, fdataMsg.Oz);
+         printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", dataMsg.velocity.x, dataMsg.velocity.y, dataMsg.velocity.z, dataMsg.yaw_rate);
          cout << "\n"
               << endl;
 
