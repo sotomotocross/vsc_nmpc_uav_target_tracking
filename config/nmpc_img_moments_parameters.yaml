@@ -1,8 +1,13 @@
 # nmpc_img_moments_with_cbf
 gain_tx: 1.0
 gain_ty: 1.0
-gain_tz: 2.0
+gain_tz: 0.4
 gain_yaw: 1.0
+
+# gain_tx: 0.0
+# gain_ty: 0.0
+# gain_tz: 0.0
+# gain_yaw: 0.0
 
 # nmpc_img_moments_without_cbf
 # gain_tx: 1.0

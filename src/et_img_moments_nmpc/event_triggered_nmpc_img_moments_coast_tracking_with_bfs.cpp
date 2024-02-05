@@ -4,10 +4,8 @@
 #include "img_seg_cnn/PREDdata.h"
 #include "img_seg_cnn/POLYcalc_custom.h"
 #include "img_seg_cnn/POLYcalc_custom_tf.h"
-#include "img_seg_cnn/Optical_flow_custom.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Float64MultiArray.h"
-
 #include "vsc_nmpc_uav_target_tracking/rec.h"
 #include <vector>
 #include <algorithm>
@@ -28,18 +26,6 @@
 
 using namespace std;
 using namespace Eigen;
-
-// #include <sstream> 
-// // using Eigen::EigenBase;   
-// // using std::ostringstream; 
-
-// template <typename Derived>
-// string get_shape(const EigenBase<Derived>& x)
-// {
-//     ostringstream oss;
-//     oss  << "(" << x.rows() << ", " << x.cols() << ")";
-//     return oss.str();
-// }
 
 double cX, cY;
 int cX_int, cY_int;
@@ -136,8 +122,6 @@ double sigma_constraints_square_log = log(sigma_constraints_square);
 
 double angle_deg_constraint = 45;
 double angle_deg_constraint_tan = tan((angle_deg_constraint / 180) * 3.14);
-
-double mean_opt_flow, mean_final_opt_flow;
 
 // distance between two 2D points
 double distance(double x1, double y1, double x2, double y2)
@@ -280,111 +264,129 @@ double state_bar_fnct_calc(VectorXd camTwist)
 
 VectorXd barrier_function_calculation()
 {
-    double a = 1.5;
-    double sigma_lb = 3.8;
-    double sigma_ub = 5.5;
-    double b = 0.9;
+   double a = 1.5;
+   double sigma_lb = 3.8;
+   double sigma_ub = 5.5;
+   double b = 0.9;
 
-    vector<pair<double, double>> polygon = {{-1.43, -0.954}, {1.43, -0.954}, {1.43, 0.954}, {-1.43, 0.954}}; // square
+   vector<pair<double, double>> polygon = {{-1.43, -0.954}, {1.43, -0.954}, {1.43, 0.954}, {-1.43, 0.954}}; // square
 
-    double px = ((opencv_moments[1] / opencv_moments[0]) - cu) / l, py = ((opencv_moments[2] / opencv_moments[0]) - cv) / l; // point
-    double closestx, closesty;
-    double dist = distance(px, py, polygon, closestx, closesty);
-    // cout << "Minimum distance from point (" << px << ", " << py << ") to polygon is " << dist << endl;
-    // cout << "Closest point on polygon is (" << closestx << ", " << closesty << ")" << endl;
+   double px = ((opencv_moments[1] / opencv_moments[0]) - cu) / l, py = ((opencv_moments[2] / opencv_moments[0]) - cv) / l; // point
+   double closestx, closesty;
+   double dist = distance(px, py, polygon, closestx, closesty);
+   // cout << "Minimum distance from point (" << px << ", " << py << ") to polygon is " << dist << endl;
+   // cout << "Closest point on polygon is (" << closestx << ", " << closesty << ")" << endl;
 
-    double px_des = 0.0, py_des = 0.0; // point
-    double closestx_des, closesty_des;
-    double dist_des = distance(px_des, py_des, polygon, closestx_des, closesty_des);
-    // cout << "Minimum distance from point (" << px_des << ", " << py_des << ") to polygon is " << dist_des << endl;
-    // cout << "Closest point on polygon is (" << closestx_des << ", " << closesty_des << ")" << endl;
+   double px_des = 0.0, py_des = 0.0; // point
+   double closestx_des, closesty_des;
+   double dist_des = distance(px_des, py_des, polygon, closestx_des, closesty_des);
+   // cout << "Minimum distance from point (" << px_des << ", " << py_des << ") to polygon is " << dist_des << endl;
+   // cout << "Closest point on polygon is (" << closestx_des << ", " << closesty_des << ")" << endl;
 
-    VectorXd x(2);
-    x << px, py;
-    VectorXd z(2);
-    z << closestx, closesty;
-    VectorXd x_des(2);
-    x_des << px_des, py_des;
-    VectorXd z_des(2);
-    z_des << closestx_des, closesty_des;
+   VectorXd x(2);
+   x << px, py;
+   VectorXd z(2);
+   z << closestx, closesty;
+   VectorXd x_des(2);
+   x_des << px_des, py_des;
+   VectorXd z_des(2);
+   z_des << closestx_des, closesty_des;
 
-    double b_1 = 0.0, b_1_d = 0.0, dl1_dd = 0.0;
-    double b_2 = 0.0, b_2_d = 0.0, dl2_dd = 0.0;
-    double dd_area_ds = 0.0;
-    double grad_b2_s = 0.0;
+   double b_1 = 0.0, b_1_d = 0.0, dl1_dd = 0.0;
+   double b_2 = 0.0, b_2_d = 0.0, dl2_dd = 0.0;
+   double dd_area_ds = 0.0;
+   double grad_b2_s = 0.0;
+   double reversed_b_1 = 0.0, reversed_b_2 = 0.0;
 
-    if (dist <= a)
-    {
-        b_1 = 1 / (1 - exp(-pow(dist / (dist - a), 2)));
-        b_1_d = 1 / (1 - exp(-pow(dist_des / (dist_des - a), 2)));
-        dl1_dd = (2 * a * dist_des * exp(-(dist_des / pow(a - dist_des, 2)))) / pow(a - dist_des, 3);
-    }
-    else if (dist > a)
-    {
-        b_1 = 1;
-        b_1_d = 1;
-        dl1_dd = 0;
-    }
+   if (dist <= a)
+   {
+      b_1 = 1 / (1 - exp(-pow(dist / (dist - a), 2)));
+      reversed_b_1 = (1 - exp(-pow(dist / (dist - a), 2)));
+      b_1_d = 1 / (1 - exp(-pow(dist_des / (dist_des - a), 2)));
+      dl1_dd = (2 * a * dist_des * exp(-(dist_des / pow(a - dist_des, 2)))) / pow(a - dist_des, 3);
+   }
+   else if (dist > a)
+   {
+      b_1 = 1;
+      reversed_b_1 = 1;
+      b_1_d = 1;
+      dl1_dd = 0;
+   }
 
-    double dist_area = min(abs(log(sqrt(opencv_moments[0])) - sigma_lb), abs(log(sqrt(opencv_moments[0])) - sigma_ub));
-    double dist_area_des = min(abs(5.0 - sigma_lb), abs(5.0 - sigma_ub));
+   double dist_area = min(abs(log(sqrt(opencv_moments[0])) - sigma_lb), abs(log(sqrt(opencv_moments[0])) - sigma_ub));
+   // cout << "dist_area: " << dist_area << endl;
+   double dist_area_des = min(abs(5.0 - sigma_lb), abs(5.0 - sigma_ub));
+   // cout << "dist_area_des: " << dist_area_des << endl;
+   // cout << "b = " << b << endl;
 
-    if (dist_area <= b)
-    {
-        // cout << "Mikrotero apo b!!!" << endl;
-        b_2 = 1 / (1 - exp(-pow(dist_area / (dist_area - b), 2)));
-        b_2_d = 1 / (1 - exp(-pow(dist_area_des / (dist_area_des - b), 2)));
-        dl2_dd = (2 * b * dist_area_des * exp(-(dist_area_des / pow(b - dist_area_des, 2)))) / pow(b - dist_area_des, 3);
-        dd_area_ds = 1;
-        grad_b2_s = -(1 / pow(b_2_d, 2)) * dl2_dd * dd_area_ds;
-    }
-    else if (dist_area > b)
-    {
-        // cout << "Megalytero apo b!!!" << endl;
-        b_2 = 1;
-        b_2_d = 1;
-        dl2_dd = 0;
-        dd_area_ds = -1;
-        grad_b2_s = -(1 / pow(b_2_d, 2)) * dl2_dd * dd_area_ds;
-    }
+   if (dist_area <= b)
+   {
+      // cout << "Mikrotero apo b!!!" << endl;
+      b_2 = 1 / (1 - exp(-pow(dist_area / (dist_area - b), 2)));
+      reversed_b_2 = (1 - exp(-pow(dist_area / (dist_area - b), 2)));
+      // cout << "pow(dist_area / (dist_area - b), 2) = " << pow(dist_area / (dist_area - b), 2) << endl;
+      // cout << "-pow(dist_area / (dist_area - b), 2) = " << -pow(dist_area / (dist_area - b), 2) << endl;
+      // cout << "exp(-pow(dist_area / (dist_area - b), 2)) = " << exp(-pow(dist_area / (dist_area - b), 2)) << endl;
+      // cout << "(1 - exp(-pow(dist_area / (dist_area - b), 2))) = " << (1 - exp(-pow(dist_area / (dist_area - b), 2))) << endl;
+      // cout << "if dist_area <= b - reversed_b_2: " << reversed_b_2 << endl;
+      b_2_d = 1 / (1 - exp(-pow(dist_area_des / (dist_area_des - b), 2)));
+      dl2_dd = (2 * b * dist_area_des * exp(-(dist_area_des / pow(b - dist_area_des, 2)))) / pow(b - dist_area_des, 3);
+      dd_area_ds = 1;
+      grad_b2_s = -(1 / pow(b_2_d, 2)) * dl2_dd * dd_area_ds;
+   }
+   else if (dist_area > b)
+   {
+      // cout << "Megalytero apo b!!!" << endl;
+      b_2 = 1;
+      reversed_b_2 = 1;
+      // cout << "if dist_area > b - reversed_b_2: " << reversed_b_2 << endl;
+      b_2_d = 1;
+      dl2_dd = 0;
+      dd_area_ds = -1;
+      grad_b2_s = -(1 / pow(b_2_d, 2)) * dl2_dd * dd_area_ds;
+   }
 
-    double dd_dsx = (px_des - closestx_des) / (x_des - z_des).norm();
-    double dd_dsy = (py_des - closesty_des) / (x_des - z_des).norm();
+   double dd_dsx = (px_des - closestx_des) / (x_des - z_des).norm();
+   double dd_dsy = (py_des - closesty_des) / (x_des - z_des).norm();
 
-    double grad_b1_sx = -(1 / pow(b_1_d, 2)) * dl1_dd * dd_dsx;
-    double grad_b1_sy = -(1 / pow(b_1_d, 2)) * dl1_dd * dd_dsy;
-    double grad_b1 = grad_b1_sx * (px - px_des) + grad_b1_sy * (py - py_des);
+   double grad_b1_sx = -(1 / pow(b_1_d, 2)) * dl1_dd * dd_dsx;
+   double grad_b1_sy = -(1 / pow(b_1_d, 2)) * dl1_dd * dd_dsy;
+   double grad_b1 = grad_b1_sx * (px - px_des) + grad_b1_sy * (py - py_des);
 
-    double grad_b2 = grad_b2_s * (log(sqrt(opencv_moments[0])) - 5.0);
+   double grad_b2 = grad_b2_s * (log(sqrt(opencv_moments[0])) - 5.0);
 
-    double r_1 = b_1 - b_1_d + grad_b1;
-    double r_2 = b_2 - b_2_d + grad_b2;
+   double r_1 = b_1 - b_1_d + grad_b1;
+   double r_2 = b_2 - b_2_d + grad_b2;
 
-    // cout << "dist = " << dist << endl;
-    // cout << "dist_des = " << dist_des << endl;
-    // cout << "a = " << a << endl;
-    // cout << "b_1 = " << b_1 << endl;
-    // cout << "b_1_d = " << b_1_d << endl;
-    // cout << "grad_b1_sx = " << grad_b1_sx << endl;
-    // cout << "grad_b1_sy = " << grad_b1_sy << endl;
-    // cout << "grad_b1 = " << grad_b1 << endl;
+   // cout << "dist = " << dist << endl;
+   // cout << "dist_des = " << dist_des << endl;
+   // cout << "a = " << a << endl;
+   // cout << "b_1 = " << b_1 << endl;
+   // cout << "b_1_d = " << b_1_d << endl;
+   // cout << "grad_b1_sx = " << grad_b1_sx << endl;
+   // cout << "grad_b1_sy = " << grad_b1_sy << endl;
+   // cout << "grad_b1 = " << grad_b1 << endl;
 
-    // cout << "log(sqrt(opencv_moments[0])) = " << log(sqrt(opencv_moments[0])) << endl;
-    // cout << "dist_area = " << dist_area << endl;
-    // cout << "dist_area_des = " << dist_area_des << endl;
-    // cout << "b = " << b << endl;
-    // cout << "b_2 = " << b_2 << endl;
-    // cout << "b_2_d = " << b_2_d << endl;
-    // cout << "grad_b2_s = " << grad_b2_s << endl;
-    // cout << "grad_b2 = " << grad_b2 << endl;
+   // cout << "log(sqrt(opencv_moments[0])) = " << log(sqrt(opencv_moments[0])) << endl;
+   // cout << "dist_area = " << dist_area << endl;
+   // cout << "dist_area_des = " << dist_area_des << endl;
+   // cout << "b = " << b << endl;
+   // cout << "b_2 = " << b_2 << endl;
+   // cout << "b_2_d = " << b_2_d << endl;
+   // cout << "grad_b2_s = " << grad_b2_s << endl;
+   // cout << "grad_b2 = " << grad_b2 << endl;
 
-    VectorXd barrier_function(2);
-    barrier_function.setZero(2);
+   VectorXd barrier_function(2);
+   barrier_function.setZero(2);
 
-    barrier_function << r_1, r_2;
-    // cout << "barrier_function: " << barrier_function.transpose() << endl;
+   stored_barrier_function.setZero(2);
+   stored_barrier_function << reversed_b_1, reversed_b_2;
+   // cout << "stored_barrier_function: " << stored_barrier_function.transpose() << endl;
 
-    return barrier_function;
+   barrier_function << r_1, r_2;
+   // cout << "barrier_function: " << barrier_function.transpose() << endl;
+
+   return barrier_function;
 }
 
 VectorXd calculate_moments(VectorXd feat_u, VectorXd feat_v)
@@ -982,70 +984,6 @@ VectorXd IBVSSystem(VectorXd camTwist)
     return Le * camTwist;
 }
 
-MatrixXd tracker_calculation(){
-    MatrixXd grad_of_system(transformed_features.size(),dim_s);
-    grad_of_system.setZero(transformed_features.size(),dim_s);
-    // cout << "\ngrad_of_system: \n" << grad_of_system << endl;
-
-    float N = transformed_features.size()/2;
-    // cout << "N = " << N << endl;
-    // cout << "1/N = " << 1/N << endl;
-    double E_1 = (transformed_features[0] + transformed_features[1] - 2*(((opencv_moments[1] / opencv_moments[0]) - cu) / l));
-
-    // First feature (first - last)
-    double area_0 = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[3] - transformed_features[transformed_features.size()-1]);
-    double area_1 = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[2] + transformed_features[transformed_features.size()-2]);
-    double sgn = (1.0 + 0.0 - (2/N))/pow(E_1,2);
-    double alpha_0 = sgn*(-(transformed_features[1] + transformed_features[3] - 2*(((opencv_moments[2] / opencv_moments[0]) - cu) / l)));
-    double alpha_1 = sgn*(transformed_features[0] + transformed_features[1] - 2*(((opencv_moments[1] / opencv_moments[0]) - cu) / l));
-
-    grad_of_system.row(0) << 1.0/N, 0.0, area_0, alpha_0;
-    grad_of_system.row(1) << 0, 1.0/N, area_1, alpha_1;
-    // ---------------------------------------
-
-    // Second feature
-    double area_k = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[5] - transformed_features[1]);
-    double area_k_p_1 = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[4] + transformed_features[0]);
-    double sgn_2 = (1.0 + 0.0 - (2/N))/pow(E_1,2);
-    double alpha_k = (-(transformed_features[1] + transformed_features[3] - 2*(((opencv_moments[2] / opencv_moments[0]) - cu) / l)));
-    double alpha_k_p_1 = (transformed_features[0] + transformed_features[1] - 2*(((opencv_moments[1] / opencv_moments[0]) - cu) / l));  
-
-    grad_of_system.row(2) << 1/N, 0.0, area_k, sgn_2*alpha_k;
-    grad_of_system.row(3) << 0, 1/N, area_k_p_1, sgn_2*alpha_k_p_1;
-    // ----------------------------------------------
-
-    // Last feature (last - first)
-    double area_last_x = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[1] - transformed_features[transformed_features.size()-3]);
-    double area_last_y = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[0] + transformed_features[transformed_features.size()-4]);
-    double sgn_1 = (0.0 + 0.0 - (2/N))/pow(E_1,2);
-    double alpha_last_x = sgn_1*(-(transformed_features[1] + transformed_features[3] - 2*(((opencv_moments[2] / opencv_moments[0]) - cu) / l)));
-    double alpha_last_y = sgn_1*(transformed_features[0] + transformed_features[1] - 2*(((opencv_moments[1] / opencv_moments[0]) - cu) / l));
-
-    grad_of_system.row(transformed_features.size()-2) << 1.0/N, 0.0, area_last_x, alpha_last_x;
-    grad_of_system.row(transformed_features.size()-1) << 0, 1.0/N, area_last_y, alpha_last_y;
-    // ----------------------------------
-
-    double sgn_3 = (0.0 + 0.0 - (2/N))/pow(E_1,2); 
-
-    for (int k = 4; k < transformed_features.size()-2; k++){
-
-        double area_k = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[k+1] - transformed_features[k-1]);
-        double area_k_p_1 = 0.5*log(sqrt(opencv_moments[0]))*(transformed_features[k+2] + transformed_features[k-2]);
-
-        grad_of_system.row(k) << 1/N, 0.0, area_k, sgn_3*alpha_k;
-        grad_of_system.row(k+1) << 0, 1/N, area_k_p_1, sgn_3*alpha_k_p_1;
-
-        // grad_of_system.row(k) << 1/N, 0.0, area_k, sgn_2*alpha_k;
-        // grad_of_system.row(k+1) << 0, 1/N, area_k_p_1, sgn_2*alpha_k_p_1;
-        k++;
-    }
-
-    // cout << "grad_of_system: \n" << grad_of_system << endl;
-    // cout  << "(" << grad_of_system.rows() << ", " << grad_of_system.cols() << ")" << "\n" << endl;
-    return grad_of_system;
-}
-
-
 // PVS-MPC Cost Function
 double costFunction(unsigned int n, const double *x, double *grad, void *data)
 {
@@ -1060,50 +998,16 @@ double costFunction(unsigned int n, const double *x, double *grad, void *data)
     traj_s.col(0) << ((opencv_moments[1] / opencv_moments[0]) - cu) / l, ((opencv_moments[2] / opencv_moments[0]) - cv) / l, log(sqrt(opencv_moments[0])), atan(2 * opencv_moments[11] / (opencv_moments[10] - opencv_moments[12]));
     traj_s_test.col(0) << transformed_s_bar_x, transformed_s_bar_y, transformed_sigma_square_log, transformed_tangent;
 
-    // cout << "log(sqrt(opencv_moments[0])) = " << log(sqrt(opencv_moments[0])) << endl;
-    // cout << "transformed_sigma_square_log = " << transformed_sigma_square_log << endl;
-
-    // cout << "transformed_features: " << transformed_features.transpose() << endl;
-    // cout << "transformed_polygon_features: " << transformed_polygon_features.transpose() << endl;
-
-    VectorXd optical_flow_estimate(transformed_features.size(),1);
-    optical_flow_estimate.setOnes(transformed_features.size(),1);
-    // cout << "optical_flow_estimate: " << optical_flow_estimate.transpose() << endl;
-    VectorXd mean_opt_flow_estimate = mean_final_opt_flow*optical_flow_estimate;
-    // cout << "mean_opt_flow_estimate: " << mean_opt_flow_estimate.transpose() << endl;
-
-    MatrixXd estimate_gains(dim_s,dim_s);
-    estimate_gains.setZero(dim_s,dim_s);
-    estimate_gains(0,0) = 1.0;
-    estimate_gains(1,1) = 1000.0;
-    // cout << "estimate_gains: " << estimate_gains << endl; 
-
     // Progate the model (PVS with Image Jacobian)
     for (int k = 0; k < mpc_hrz; k++)
     {
         VectorXd feat_prop = IBVSSystem(inputs.col(k));
         feature_hrz_prop.col(k + 1) = feature_hrz_prop.col(k) + feat_prop * mpc_dt;
         VectorXd sdot = Dynamic_System_x_y_reverted(inputs.col(k), feature_hrz_prop.col(k));
-        // cout << "\nsdot: " << sdot.transpose() << endl;
-        // cout << "Shape of sdot: " << "(" << sdot.rows() << ", " << sdot.cols() << ")" << endl;
+
         VectorXd sdot_test = img_moments_system(inputs.col(k), opencv_moments);
-        // cout << "transformed_features.size(): " << transformed_features.size() <<endl;
-        MatrixXd tracking_term = tracker_calculation();
-        
-        // cout << "tracking_term: \n" << tracking_term << endl;
-        // cout << "Shape of tracking_term: " << "(" << tracking_term.rows() << ", " << tracking_term.cols() << ")" << endl;
-        // cout << "mean_opt_flow_estimate: \n" << mean_opt_flow_estimate << endl;
-        // cout << "Shape of mean_opt_flow_estimate: " << "(" << mean_opt_flow_estimate.rows() << ", " << mean_opt_flow_estimate.cols() << ")" << endl;
 
-        MatrixXd transpose_tracking_term = tracking_term.transpose();
-        // cout << "Shape of transpose_tracking_term: " << "(" << transpose_tracking_term.rows() << ", " << transpose_tracking_term.cols() << ")" << endl;
-        VectorXd final_estimation_without_mpc_dt = transpose_tracking_term*mean_opt_flow_estimate;
-        // cout << "final_estimation_without_mpc_dt: " << final_estimation_without_mpc_dt << endl;
-        // cout << "Shape of final_estimation_without_mpc_dt: " << "(" << final_estimation_without_mpc_dt.rows() << ", " << final_estimation_without_mpc_dt.cols() << ")" << endl;
-        // cout << "tracking_term.transpose()*mean_opt_flow: " << tracking_term*mean_opt_flow << endl;
-        // cout << "estimate_gains: " << estimate_gains << endl;         
-
-        traj_s.col(k + 1) = traj_s.col(k) + sdot_test * mpc_dt + estimate_gains*final_estimation_without_mpc_dt*mpc_dt;
+        traj_s.col(k + 1) = traj_s.col(k) + sdot_test * mpc_dt;
         traj_s_test.col(k + 1) = traj_s_test.col(k) + sdot * mpc_dt;
     }
 
@@ -1196,8 +1100,13 @@ double costFunction(unsigned int n, const double *x, double *grad, void *data)
     stored_s_des = s_des.col(0);
     stored_traj_s = traj_s.col(0);
 
+    // stored_barrier_function.setZero(2);
+    // stored_barrier_function = bar_fnct;
+    stored_state_bar_function = state_bar_fnct;
+
     // return Ji + Jt + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
-    return Ji + Jt;
+    return Ji_1 + Jt_1 + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
+    // return Ji + Jt;
 }
 
 // PVS-MPC Cost Function
@@ -1313,9 +1222,15 @@ double costFunction_alter(unsigned int n, const double *x, double *grad, void *d
     // cout << "(cX_int - cu)/l = " << (cX_int - cu) / l << endl;
     // cout << "(cY_int - cv)/l = " << (cY_int - cv) / l << endl;
 
+    stored_s_des = s_des.col(0);
+    stored_traj_s = traj_s.col(0);
+
+    stored_barrier_function.setZero(2);
+    stored_barrier_function = bar_fnct;
+    stored_state_bar_function = state_bar_fnct;
+
     // return Ji + Jt + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
-    // return Ji_1 + Jt_1 + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
-    return Ji_1 + Jt_1;
+    return Ji_1 + Jt_1 + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
 }
 
 //****DEFINE FOV CONSTRAINTS****//
@@ -1521,16 +1436,6 @@ void altitudeCallback(const std_msgs::Float64::ConstPtr &alt_message)
     // printf("Relative altitude is (%g,%g,%g,%g) =", Z0, Z1, Z2, Z3);
 }
 
-//****UPDATE OPTICAL FLOW****//
-void ofCallback(const img_seg_cnn::Optical_flow_custom::ConstPtr &of_message)
-{
-    mean_opt_flow = of_message->mean_flow;
-    mean_final_opt_flow = of_message->mean_final_flow;    
-    // cout << "mean_opt_flow = " << mean_opt_flow << endl;
-    // cout << "mean_final_opt_flow = " << mean_final_opt_flow << endl;
-    flag = 1;    
-}
-
 //****MAIN****//
 int main(int argc, char **argv)
 {
@@ -1543,11 +1448,12 @@ int main(int argc, char **argv)
     ros::Subscriber feature_sub_poly_custom = nh.subscribe<img_seg_cnn::POLYcalc_custom>("/polycalc_custom", 10, featureCallback_poly_custom);
     ros::Subscriber feature_sub_poly_custom_tf = nh.subscribe<img_seg_cnn::POLYcalc_custom_tf>("/polycalc_custom_tf", 10, featureCallback_poly_custom_tf);
     ros::Subscriber alt_sub = nh.subscribe<std_msgs::Float64>("/mavros/global_position/rel_alt", 10, altitudeCallback);
-    ros::Subscriber of_sub = nh.subscribe<img_seg_cnn::Optical_flow_custom>("/optical_flow_output", 10, ofCallback);
 
     // Create subscribers
     ros::Publisher vel_pub = nh.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 1);
     ros::Publisher rec_pub = nh.advertise<vsc_nmpc_uav_target_tracking::rec>("/vsc_nmpc_uav_target_tracking/msg/rec", 1);
+    ros::Publisher bar_function_values = nh.advertise<std_msgs::Float64MultiArray>("/barrier_functions", 1);
+    ros::Publisher state_bar_function_value = nh.advertise<std_msgs::Float64>("/state_barrier_function", 1);
 
     // Initialize MPC Variables
     s_des.setZero(dim_s, mpc_hrz + 1);
@@ -1652,10 +1558,8 @@ optlabel:
     {
         double start = ros::Time::now().toSec();
         //***** OPTIMISATION TRIGGERING	******
-        // cout << "\n" << endl;
-        cout << "Optimization Return Code: " << nlopt_optimize(opt, inputs, &minJ) << "\n" << endl;
+        cout << "Optimization Return Code: " << nlopt_optimize(opt, inputs, &minJ) << endl;
         cout << "OPTIMIZATION WAS RUN" << endl;
-        cout << "\n" << endl;
         double end = ros::Time::now().toSec();
     }
 
@@ -1888,14 +1792,14 @@ optlabel:
                     //****EVENT-TRIGGERING CONDITION****//
                     // double first_Lzm2 = Lzm * (xk - xk_pred).squaredNorm();
                     // cout << "first Lzm2: " << first_Lzm2 << endl;
+                    // double trigger_sigma = 15;
                     double trigger_sigma;
                     nh.getParam("/trigger_sigma", trigger_sigma);
-                    // double trigger_sigma = 15e5;
                     // cout << "trigger_sigma: " << trigger_sigma << endl;
                     double second_Lzm2 = Lzm * alt_ekm;
                     cout << "second Lzm2: " << second_Lzm2 << endl;
                     // cout << "Fbar: " << Fbar << endl;
-                    cout << "sigma*Fbar: " << trigger_sigma*Fbar << endl;
+                    cout << "sigma*Fbar: " << trigger_sigma * Fbar << endl;
                     // double Lzm1 = Lzm*(xk-xk_pred).norm();
                     // double Lzminf = Lzm*(xk-xk_pred).lpNorm<Infinity>();
                     // cout << "Lzm <  " << second_Lzm2 << " trigger_sigma* Fbar  " << trigger_sigma*Fbar << endl;
@@ -1914,8 +1818,6 @@ optlabel:
                         // cout << "fdataMsg.time: " << fdataMsg.time << endl;
                         trig = 5;
                         fdataMsg.trig = trig;
-                        // cout << "mean_opt_flow = " << mean_opt_flow << endl;
-                        // cout << "mean_final_opt_flow = " << mean_final_opt_flow << endl;
                         // fdataMsg.time = timer;
                         // optNum = nlopt_optimize(opt, inputs, &minJ);
                         goto optlabel;
@@ -1971,7 +1873,8 @@ optlabel:
             nh.getParam("/gain_yaw", gain_yaw);
             // cout << "gain_yaw: " << gain_yaw << endl;
 
-            dataMsg.velocity.x = gain_tx * Tx + 1.5;
+            // dataMsg.velocity.x = gain_tx * Tx + 1.5;
+            dataMsg.velocity.x = gain_tx * Tx + 1.0;
             // dataMsg.velocity.x = 0.0;
             dataMsg.velocity.y = gain_ty * Ty;
             // dataMsg.velocity.y = (1.5) * Ty;
@@ -2063,9 +1966,24 @@ optlabel:
             // cout << "\n"
             //      << endl;
 
-            printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", dataMsg.velocity.x, dataMsg.velocity.y, dataMsg.velocity.z, dataMsg.yaw_rate);
-            cout << "\n"
-                 << endl;
+            // printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", dataMsg.velocity.x, dataMsg.velocity.y, dataMsg.velocity.z, dataMsg.yaw_rate);
+            // cout << "\n"
+            //      << endl;
+
+            std_msgs::Float64MultiArray stored_barrier_function_Msg;
+            for (int i = 0; i < stored_barrier_function.size(); i++)
+            {
+                stored_barrier_function_Msg.data.push_back(stored_barrier_function[i]);
+            }
+
+            bar_function_values.publish(stored_barrier_function_Msg);
+
+            // cout << "before publish stored_barrier_function = " << stored_barrier_function.transpose() << endl;
+            // cout << "stored_state_bar_function = " << stored_state_bar_function << endl;
+
+            std_msgs::Float64 msg;
+            msg.data = stored_state_bar_function;
+            state_bar_function_value.publish(msg);
 
             rec_pub.publish(fdataMsg);
             vel_pub.publish(dataMsg);

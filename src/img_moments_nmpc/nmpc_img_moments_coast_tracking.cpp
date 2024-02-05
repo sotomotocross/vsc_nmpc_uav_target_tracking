@@ -954,8 +954,10 @@ VectorXd IBVSSystem(VectorXd camTwist)
 // PVS-MPC Cost Function
 double costFunction(unsigned int n, const double *x, double *grad, void *data)
 {
-   cout << "\nGia pame ligo!!!" << endl;
+   // cout << "\nGia pame ligo!!!" << endl;
    MatrixXd inputs = Map<Matrix<double, dim_inputs, mpc_hrz>>((double *)x);
+   // cout << "Cost function inputs: " << inputs << endl;
+   // cout << "Cost function inputs shape: (" << inputs.rows() << "," << inputs.cols() << ")" << endl;
    // Trajectory of States (image features)
    MatrixXd traj_s(dim_s, mpc_hrz + 1);
    MatrixXd traj_s_test(dim_s, mpc_hrz + 1);
@@ -1026,19 +1028,20 @@ double costFunction(unsigned int n, const double *x, double *grad, void *data)
    // cout << "Jt: \n" << Jt << endl;
 
    Jt = et.transpose() * P * et;
+   Jt_1 = et_1.transpose() * P * et_1;
    //   cout << "Ji = " << Ji << " + " << "Jt = " << Jt << endl;\
 
    VectorXd bar_fnct = barrier_function_calculation();
    double state_bar_fnct = state_bar_fnct_calc(inputs.col(0));
 
-   cout << "traj_s.col(0): " << traj_s.col(0).transpose() << endl;
-   cout << "traj_s_test.col(0): " << traj_s_test.col(0).transpose() << endl;
+   // cout << "traj_s.col(0): " << traj_s.col(0).transpose() << endl;
+   // cout << "traj_s_test.col(0): " << traj_s_test.col(0).transpose() << endl;
 
-   cout << "s_des.col(0): " << s_des.col(0).transpose() << endl;
-   cout << "s_des_test.col(0): " << s_des_test.col(0).transpose() << endl;
+   // cout << "s_des.col(0): " << s_des.col(0).transpose() << endl;
+   // cout << "s_des_test.col(0): " << s_des_test.col(0).transpose() << endl;
 
-   cout << "ek = " << ek.transpose() << endl;
-   cout << "et = " << et.transpose() << endl;
+   // cout << "ek = " << ek.transpose() << endl;
+   // cout << "et = " << et.transpose() << endl;
 
    // cout << "ek_1 = " << ek_1.transpose() << endl;
    // cout << "et_1 = " << et_1.transpose() << endl;
@@ -1069,13 +1072,16 @@ double costFunction(unsigned int n, const double *x, double *grad, void *data)
 
    // return Ji + Jt + bar_fnct[0] + bar_fnct[1] + state_bar_fnct;
    return Ji + Jt;
+   // return Ji_1 + Jt_1;
 }
 
 // PVS-MPC Cost Function
 double costFunction_alter(unsigned int n, const double *x, double *grad, void *data)
 {
-   cout << "\nGia pame ligo!!!" << endl;
+   // cout << "\nGia pame ligo!!!" << endl;
    MatrixXd inputs = Map<Matrix<double, dim_inputs, mpc_hrz>>((double *)x);
+   // cout << "Cost function alternate inputs: " << inputs << endl;
+   cout << "Cost function alternate inputs shape: (" << inputs.rows() << "," << inputs.cols() << ")" << endl;
    // Trajectory of States (image features)
    MatrixXd traj_s(dim_s, mpc_hrz + 1);
    MatrixXd traj_s_test(dim_s, mpc_hrz + 1);
@@ -1151,17 +1157,17 @@ double costFunction_alter(unsigned int n, const double *x, double *grad, void *d
    VectorXd bar_fnct = barrier_function_calculation();
    double state_bar_fnct = state_bar_fnct_calc(inputs.col(0));
 
-   cout << "traj_s.col(0): " << traj_s.col(0).transpose() << endl;
-   cout << "traj_s_test.col(0): " << traj_s_test.col(0).transpose() << endl;
+   // cout << "traj_s.col(0): " << traj_s.col(0).transpose() << endl;
+   // cout << "traj_s_test.col(0): " << traj_s_test.col(0).transpose() << endl;
 
-   cout << "s_des.col(0): " << s_des.col(0).transpose() << endl;
-   cout << "s_des_test.col(0): " << s_des_test.col(0).transpose() << endl;
+   // cout << "s_des.col(0): " << s_des.col(0).transpose() << endl;
+   // cout << "s_des_test.col(0): " << s_des_test.col(0).transpose() << endl;
 
    // cout << "ek = " << ek.transpose() << endl;
    // cout << "et = " << et.transpose() << endl;
 
-   cout << "ek_1 = " << ek_1.transpose() << endl;
-   cout << "et_1 = " << et_1.transpose() << endl;
+   // cout << "ek_1 = " << ek_1.transpose() << endl;
+   // cout << "et_1 = " << et_1.transpose() << endl;
 
    // cout << "bar_fnct: " << bar_fnct.transpose() << endl;
    // cout << "state_bar_fnct: " << state_bar_fnct << endl;
@@ -1193,6 +1199,8 @@ double costFunction_alter(unsigned int n, const double *x, double *grad, void *d
 void constraints(unsigned int m, double *c, unsigned int n, const double *x, double *grad, void *data)
 {
    MatrixXd inputs = Map<Matrix<double, dim_inputs, mpc_hrz>>((double *)x);
+   // cout << "Constraints function inputs: " << inputs << endl;
+   cout << "Constraints function inputs shape: (" << inputs.rows() << "," << inputs.cols() << ")" << endl;
    // Trajectory of States (image features)
    MatrixXd traj_s(dim_s, mpc_hrz + 1);
    MatrixXd traj_s_test(dim_s, mpc_hrz + 1);
@@ -1331,13 +1339,13 @@ void featureCallback_poly_custom_tf(const img_seg_cnn::POLYcalc_custom_tf::Const
       // cout << "i = " << i << endl;
       opencv_moments[i] = s_message->moments[i];
    }
-   cout << "opencv_moments after subscription: " << opencv_moments.transpose() << endl;
+   // cout << "opencv_moments after subscription: " << opencv_moments.transpose() << endl;
 
-   cout << "opencv_moments[1]/opencv_moments[0] = " << opencv_moments[1] / opencv_moments[0] << endl;
-   cout << "(opencv_moments[1]/opencv_moments[0]-cu)/l = " << (opencv_moments[1] / opencv_moments[0] - cu) / l << endl;
+   // cout << "opencv_moments[1]/opencv_moments[0] = " << opencv_moments[1] / opencv_moments[0] << endl;
+   // cout << "(opencv_moments[1]/opencv_moments[0]-cu)/l = " << (opencv_moments[1] / opencv_moments[0] - cu) / l << endl;
 
-   cout << "opencv_moments[2]/opencv_moments[0] = " << opencv_moments[2] / opencv_moments[0] << endl;
-   cout << "(opencv_moments[2]/opencv_moments[0]-cv)/l = " << (opencv_moments[2] / opencv_moments[0] - cv) / l << endl;
+   // cout << "opencv_moments[2]/opencv_moments[0] = " << opencv_moments[2] / opencv_moments[0] << endl;
+   // cout << "(opencv_moments[2]/opencv_moments[0]-cv)/l = " << (opencv_moments[2] / opencv_moments[0] - cv) / l << endl;
 
    cX = opencv_moments[1] / opencv_moments[0];
    cY = opencv_moments[2] / opencv_moments[0];
@@ -1345,35 +1353,35 @@ void featureCallback_poly_custom_tf(const img_seg_cnn::POLYcalc_custom_tf::Const
    cX_int = (int)cX;
    cY_int = (int)cY;
 
-   cout << "cX = " << cX << endl;
-   cout << "cY = " << cY << endl;
-   cout << "(cX - cu)/l = " << (cX - cu) / l << endl;
-   cout << "(cY - cv)/l = " << (cY - cv) / l << endl;
-   cout << "cX_int = " << cX_int << endl;
-   cout << "cY_int = " << cY_int << endl;
-   cout << "(cX_int - cu)/l = " << (cX_int - cu) / l << endl;
-   cout << "(cY_int - cv)/l = " << (cY_int - cv) / l << endl;
+   // cout << "cX = " << cX << endl;
+   // cout << "cY = " << cY << endl;
+   // cout << "(cX - cu)/l = " << (cX - cu) / l << endl;
+   // cout << "(cY - cv)/l = " << (cY - cv) / l << endl;
+   // cout << "cX_int = " << cX_int << endl;
+   // cout << "cY_int = " << cY_int << endl;
+   // cout << "(cX_int - cu)/l = " << (cX_int - cu) / l << endl;
+   // cout << "(cY_int - cv)/l = " << (cY_int - cv) / l << endl;
 
-   cout << "------------------------------------------------------------------" << endl;
-   cout << "------ Transformed features shape and angle of the polygon -------" << endl;
-   cout << "------------------------------------------------------------------" << endl;
+   // cout << "------------------------------------------------------------------" << endl;
+   // cout << "------ Transformed features shape and angle of the polygon -------" << endl;
+   // cout << "------------------------------------------------------------------" << endl;
 
-   cout << "transformed_features: " << transformed_features.transpose() << endl;
-   cout << "transformed_polygon_features: " << transformed_polygon_features.transpose() << endl;
+   // cout << "transformed_features: " << transformed_features.transpose() << endl;
+   // cout << "transformed_polygon_features: " << transformed_polygon_features.transpose() << endl;
 
-   cout << "transformed_s_bar_x: " << transformed_s_bar_x << endl;
-   cout << "transformed_s_bar_y: " << transformed_s_bar_y << endl;
+   // cout << "transformed_s_bar_x: " << transformed_s_bar_x << endl;
+   // cout << "transformed_s_bar_y: " << transformed_s_bar_y << endl;
 
-   cout << "transformed_first_min_index: " << transformed_first_min_index << endl;
-   cout << "transformed_second_min_index: " << transformed_second_min_index << endl;
+   // cout << "transformed_first_min_index: " << transformed_first_min_index << endl;
+   // cout << "transformed_second_min_index: " << transformed_second_min_index << endl;
 
-   cout << "transformed_sigma: " << transformed_sigma << endl;
-   cout << "transformed_sigma_square: " << transformed_sigma_square << endl;
-   cout << "transformed_sigma_square_log: " << transformed_sigma_square_log << endl;
+   // cout << "transformed_sigma: " << transformed_sigma << endl;
+   // cout << "transformed_sigma_square: " << transformed_sigma_square << endl;
+   // cout << "transformed_sigma_square_log: " << transformed_sigma_square_log << endl;
 
-   cout << "transformed_tangent: " << transformed_tangent << endl;
-   cout << "transformed_angle_radian: " << transformed_angle_radian << endl;
-   cout << "transformed_angle_deg: " << transformed_angle_deg << endl;
+   // cout << "transformed_tangent: " << transformed_tangent << endl;
+   // cout << "transformed_angle_radian: " << transformed_angle_radian << endl;
+   // cout << "transformed_angle_deg: " << transformed_angle_deg << endl;
 
    flag = 1;
    // cout << "Feature callback flag: " << flag << endl;
@@ -1510,7 +1518,7 @@ startlabel:
             // cout << "Optimization Return Code: " << nlopt_optimize(opt, inputs, &minJ) << endl;
             // cout << "Optimization Return Code: " << optNum << endl;
          }
-         printf("found minimum at J(%g,%g,%g,%g) = %g\n", inputs[0], inputs[1], inputs[2], inputs[3], minJ);
+         // printf("found minimum at J(%g,%g,%g,%g) = %g\n", inputs[0], inputs[1], inputs[2], inputs[3], minJ);
 
          double end = ros::Time::now().toSec();
          double tf = ros::WallTime::now().toSec();
@@ -1629,7 +1637,7 @@ startlabel:
          fdataMsg.time = timer;
          fdataMsg.dtloop = dt;
 
-         printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", fdataMsg.Tx, fdataMsg.Ty, fdataMsg.Tz, fdataMsg.Oz);
+         printf("Drone Velocities Tx,Ty,Tz,Oz(%g,%g,%g,%g)", dataMsg.velocity.x, dataMsg.velocity.y, dataMsg.velocity.z, dataMsg.yaw_rate);
          cout << "\n"
               << endl;
 

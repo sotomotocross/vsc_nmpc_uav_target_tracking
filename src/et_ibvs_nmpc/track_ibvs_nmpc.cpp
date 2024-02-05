@@ -40,6 +40,7 @@ MatrixXd R;
 MatrixXd P;
 VectorXd t;
 VectorXd ek;
+// MatrixXd inputs(dim_inputs,mpc_hrz);
 
 // Simulator camera parameters
 double umax = 720;
@@ -120,7 +121,7 @@ VectorXd IBVSSystem(VectorXd camTwist)
    MatrixXd Le(dim_s,dim_inputs);
    //,Le.setZero(dim_s,dim_inputs);
 
-   cout << "camTwist shape: (" << camTwist.rows() << "," << camTwist.cols() << ")" << endl;
+   // cout << "camTwist shape: (" << camTwist.rows() << "," << camTwist.cols() << ")" << endl;
 
    // cout << "(x0,g0,Z0): (" << x0 << "," << g0 << "," << Z0 << ")" << endl;
    // cout << "(x1,g1,Z1): (" << x1 << "," << g1 << "," << Z1 << ")" << endl;
@@ -136,9 +137,9 @@ VectorXd IBVSSystem(VectorXd camTwist)
          -1/Z3, 0.0, x3/Z3, g3,
          0.0, -1/Z3, g3/Z3, -x3;
 
-   cout << "Le: " << Le << endl;
+   // cout << "Le: " << Le << endl;
    
-   cout << "Le shape: (" << Le.rows() << "," << Le.cols() << ")" << endl;
+   // cout << "Le shape: (" << Le.rows() << "," << Le.cols() << ")" << endl;
    
    return Le*camTwist;
    // cout << "Interaction Matrix:\n" << Le << endl;
@@ -328,7 +329,9 @@ double costFunction(unsigned int n, const double* x, double* grad, void* data)
 {
 
   MatrixXd inputs = Map<Matrix<double, dim_inputs, mpc_hrz> > ((double*) x);
-
+//   MatrixXd inputs(dim_inputs,mpc_hrz);
+//   cout << "Cost function inputs: " << inputs << endl;
+//   cout << "Cost function inputs shape: (" << inputs.rows() << "," << inputs.cols() << ")" << endl;
   //cout << inputs << endl;
   //cout << endl;
 
@@ -336,16 +339,16 @@ double costFunction(unsigned int n, const double* x, double* grad, void* data)
   MatrixXd traj_s(dim_s,mpc_hrz+1);
   traj_s.setZero(dim_s,mpc_hrz+1);
   traj_s.col(0) << x0,g0,x1,g1,x2,g2,x3,g3;
-   cout << "traj_s: \n" << traj_s << endl;
-   cout << "inputs: " << inputs << endl;
+   // cout << "traj_s: \n" << traj_s << endl;
+   // cout << "inputs: " << inputs << endl;
    
 
   //Progate the model (IBVS with Image Jacobian)
   for (int k = 0; k < mpc_hrz; k++)
       {
-         cout << "Mpike to gamidi!!!" << endl;
+         // cout << "Mpike to gamidi!!!" << endl;
         VectorXd sdot = IBVSSystem(inputs.col(k));
-        cout << "s_dot" << sdot << endl;
+      //   cout << "s_dot" << sdot << endl;
         traj_s.col(k+1) = traj_s.col(k) + sdot*mpc_dt;
       }
 
@@ -401,7 +404,10 @@ double costFunction(unsigned int n, const double* x, double* grad, void* data)
 void constraints (unsigned int m, double* c, unsigned int n, const double* x, double* grad, void* data)
 {
    //Propagate the model.
-   MatrixXd inputs = Map<Matrix<double, dim_inputs, mpc_hrz> > ((double*) x);;
+   MatrixXd inputs = Map<Matrix<double, dim_inputs, mpc_hrz> > ((double*) x);
+   // MatrixXd inputs(dim_inputs,mpc_hrz);
+   // cout << "Constraints function inputs: " << inputs << endl;
+   // cout << "Constraints function inputs shape: (" << inputs.rows() << "," << inputs.cols() << ")" << endl;
    //cout << "inputs = " << inputs << endl;
    //Trajectory of States (image features)
    MatrixXd traj_s(dim_s,mpc_hrz+1);
@@ -529,7 +535,7 @@ void featureCallback(const img_seg_cnn::PREDdata::ConstPtr& s_message)
    g3 = (v3-cv)/l;
 
    flag = 1;
-   cout << "Feature callback flag: " << flag << endl;
+   // cout << "Feature callback flag: " << flag << endl;
 
    //printf("Image Features for Point 2 are (%g,%g) =", u0, v0);
    //printf("Image Features for Point 2 are (%g,%g) =", u1, v1);
@@ -546,7 +552,7 @@ void altitudeCallback(const std_msgs::Float64::ConstPtr& alt_message)
    Z2 = alt_message->data;
    Z3 = alt_message->data;
    flag = 1;
-   cout << "Altitude callback flag: " << flag << endl;
+   // cout << "Altitude callback flag: " << flag << endl;
    //printf("Relative altitude is (%g,%g,%g,%g) =", Z0, Z1, Z2, Z3);
 
 }
@@ -573,7 +579,7 @@ int main (int argc, char **argv)
 
    s_abs.setZero(dim_s);
    s_abs << sc_x,sc_y,sc_x,sc_y,sc_x,sc_y,sc_x,sc_y;
-   cout << "s_abs: " << s_abs << endl;
+   // cout << "s_abs: " << s_abs << endl;
 
    //****SET MPC COST FUNCTION MATRICES****//
    Q.setIdentity(dim_s,dim_s);
@@ -603,10 +609,10 @@ int main (int argc, char **argv)
           inputs_ub[dim_inputs*k+3] = 1;
    }
 
-   cout << "Image Features for Point 1 are (" << x0 << "," << g0 << ")" << endl;
-   cout << "Image Features for Point 2 are (" << x1 << "," << g1 << ")" << endl;
-   cout << "Image Features for Point 3 are (" << x2 << "," << g2 << ")" << endl;
-   cout << "Image Features for Point 4 are (" << x2 << "," << g3 << ")" << endl;
+   // cout << "Image Features for Point 1 are (" << x0 << "," << g0 << ")" << endl;
+   // cout << "Image Features for Point 2 are (" << x1 << "," << g1 << ")" << endl;
+   // cout << "Image Features for Point 3 are (" << x2 << "," << g2 << ")" << endl;
+   // cout << "Image Features for Point 4 are (" << x2 << "," << g3 << ")" << endl;
    
    // printf("Image Features for Point 1 are (%g,%g) =", x0, g0);
 	// printf("Image Features for Point 2 are (%g,%g) =", x1, g1);
@@ -656,9 +662,9 @@ int main (int argc, char **argv)
    while (ros::ok())
    {
       if(x0 != 0 && g0 !=0 ){
-      cout << "While loop information" << endl;       
-      cout << "sc_x: " << sc_x << endl;
-      cout << "sc_y: " << sc_y << endl;   
+      // cout << "While loop information" << endl;       
+      // cout << "sc_x: " << sc_x << endl;
+      // cout << "sc_y: " << sc_y << endl;   
 
       double start =ros::Time::now().toSec();
       //printf("Start time:%lf\n", start);

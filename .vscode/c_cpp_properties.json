@@ -1,0 +1,54 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/sotiris/image_seg_catkin_ws/devel/include/**",
+        "/home/sotiris/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/image_common/camera_calibration_parsers/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/image_common/camera_info_manager/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/vision_opencv/cv_bridge/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/cv_camera/include/**",
+        "/home/sotiris/catkin_ws/src/rpg_dvs_ros/davis_ros_driver/include/**",
+        "/home/sotiris/catkin_ws/src/rpg_dvs_ros/dvs_calibration/include/**",
+        "/home/sotiris/catkin_ws/src/rpg_dvs_ros/dvs_renderer/include/**",
+        "/home/sotiris/catkin_ws/src/rpg_dvs_ros/dvs_ros_driver/include/**",
+        "/home/sotiris/catkin_ws/src/rpg_dvs_ros/dvxplorer_ros_driver/include/**",
+        "/home/sotiris/catkin_ws/src/gazebo_dvs_plugin/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/vision_opencv/image_geometry/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/image_common/image_transport/include/**",
+        "/home/sotiris/catkin_ws/src/UAV_simulator_ArduCopter/mavros/libmavconn/include/**",
+        "/home/sotiris/catkin_ws/src/line_tracking_with_event_cameras/line_event_tracker/include/**",
+        "/home/sotiris/catkin_ws/src/line_tracking_with_event_cameras/line_event_tracker_controller/include/**",
+        "/home/sotiris/catkin_ws/src/line_tracking_with_event_cameras/line_event_tracker_visualizer/include/**",
+        "/home/sotiris/catkin_ws/src/UAV_simulator_ArduCopter/mavros/mavros/include/**",
+        "/home/sotiris/catkin_ws/src/UAV_simulator_ArduCopter/mavros/mavros_msgs/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/image_common/polled_camera/include/**",
+        "/home/sotiris/catkin_ws/src/UAV_simulator_ArduCopter/mavros/test_mavros/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/geometry2/tf2/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/geometry2/tf2_bullet/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/geometry2/tf2_eigen/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/geometry2/tf2_geometry_msgs/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/geometry2/tf2_kdl/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/geometry2/tf2_msgs/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/geometry2/tf2_ros/include/**",
+        "/home/sotiris/image_seg_catkin_ws/src/geometry2/tf2_sensor_msgs/include/**",
+        "/home/sotiris/catkin_ws/src/UAV_simulator_ArduCopter/vrx/usv_gazebo_plugins/include/**",
+        "/home/sotiris/catkin_ws/src/UAV_simulator_ArduCopter/vrx/vrx_gazebo/include/**",
+        "/home/sotiris/catkin_ws/src/vsc_nmpc_uav_target_tracking/include/**",
+        "/home/sotiris/catkin_ws/src/UAV_simulator_ArduCopter/vrx/wave_gazebo_plugins/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

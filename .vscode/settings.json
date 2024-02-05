@@ -1,0 +1,21 @@
+{
+    "cmake.configureOnOpen": false,
+    "python.autoComplete.extraPaths": [
+        "/home/sotiris/catkin_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages",
+        "/usr/lib/python3.6/dist-packages",
+        "/usr/lib/python3.6/dist-packages",
+        "/usr/lib/python3.6/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/sotiris/catkin_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages",
+        "/usr/lib/python3.6/dist-packages",
+        "/usr/lib/python3.6/dist-packages",
+        "/usr/lib/python3.6/dist-packages"
+    ],
+    "ros.distro": "iron",
+    "files.associations": {
+        "algorithm": "cpp"
+    }
+}
