@@ -1,5 +1,5 @@
 vsc_nmpc_uav_target_tracking:
-  gain_tx: 10.0
-  gain_ty: 5.0
+  gain_tx: 8.0
+  gain_ty: 8.0
   gain_tz: 0.0
   gain_yaw: 2.5
