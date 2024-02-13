@@ -402,7 +402,7 @@ void NMPCController::solve()
             fdataMsg.dtloop = dt;
 
             rec_pub_.publish(fdataMsg);
-            vel_pub_.publish(dataMsg);
+            // vel_pub_.publish(dataMsg);
         }
         else
         {
