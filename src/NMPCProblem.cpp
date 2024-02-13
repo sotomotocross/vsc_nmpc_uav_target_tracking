@@ -189,14 +189,14 @@ double NMPCProblem::costFunction(unsigned int n, const double *x, double *grad, 
   //****DEFINE INITIAL DESIRED V****//
   // VectorXd s_des(dim_s);
   s_des.col(0) << x0d, g0d, x1d, g1d, x2d, g2d, x3d, g3d;
-  cout << "s_des = " << s_des.transpose() << endl;
+  // cout << "s_des = " << s_des.transpose() << endl;
 
   //****SET V DESIRED VELOCITY FOR THE VTA****//
   double b = 15;
   VectorXd s_at(dim_s);
   s_at.setZero(dim_s);
   s_at << 0, b / l, 0, b / l, 0, b / l, 0, b / l;
-  cout << "s_at = " << s_at.transpose() << endl;
+  // cout << "s_at = " << s_at.transpose() << endl;
 
   //****PROPOGATE THE V DESIRED IN THE HORIZON N FOR dt TIMESTEP SIZE****//
   for (int k = 0; k < mpc_hrz; k++)
@@ -204,8 +204,8 @@ double NMPCProblem::costFunction(unsigned int n, const double *x, double *grad, 
     s_des.col(k + 1) = s_des.col(k) + s_at;
   }
 
-  cout << "s_des = \n"
-       << s_des << endl;
+  // cout << "s_des = \n"
+      //  << s_des << endl;
   // cout << "v0d FUNCTION = " << g0d*l + cv << endl;
   // printf("g0d FUNCTION:%lf\n", g0d);
 
@@ -217,17 +217,17 @@ double NMPCProblem::costFunction(unsigned int n, const double *x, double *grad, 
     Ji += inputs.col(k).transpose() * R * inputs.col(k);
   }
 
-  cout << "ek = " << ek << endl;
+  // cout << "ek = " << ek << endl;
 
   // Calculate Terminal Costs
   double Jt;
   VectorXd et = traj_s.col(mpc_hrz) - s_des.col(mpc_hrz);
 
   Jt = et.transpose() * P * et;
-  cout << "et = " << et << endl;
+  // cout << "et = " << et << endl;
 
-  cout << "Ji" << Ji << "+"
-       << "Jt" << Jt << endl;
+  // cout << "Ji" << Ji << "+"
+  //      << "Jt" << Jt << endl;
   return Ji + Jt;
 }
 
@@ -282,7 +282,7 @@ std::pair<double, std::vector<double>> NMPCProblem::solve(double *inputs, double
 
   //****EXECUTE OPTIMIZATION****//
   optNum = nlopt_optimize(opt, inputs, &minJ);
-  cout << "Optimization Return Code: " << optNum << endl;
+  // cout << "Optimization Return Code: " << optNum << endl;
   // printf("Found minimum at J(%g,%g,%g,%g) = %g\n", inputs[0], inputs[1], inputs[2], inputs[3], minJ);
 
   // Copy the optimized inputs to the vector

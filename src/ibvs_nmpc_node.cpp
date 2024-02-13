@@ -15,8 +15,12 @@ int main(int argc, char** argv) {
     // Create NMPC controller object
     NMPCController controller(nh, pnh);
 
-    // Enter the ROS spin loop
-    ros::spin();
+    // Enter the control loop
+    while (ros::ok())
+    {
+        controller.solve();
+        ros::spinOnce();
+    }
 
     return 0;
 }

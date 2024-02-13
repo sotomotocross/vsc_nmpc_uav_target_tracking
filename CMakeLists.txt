@@ -59,22 +59,22 @@ include_directories(
 
 ## Add source files
 set(SOURCE_FILES
-#   src/Controller_old.cpp
   src/DynamicsCalculator.cpp
-  # src/FeatureData.cpp
   src/NMPCController.cpp
   src/NMPCProblem.cpp
   src/VelocityTransformer.cpp
+  src/ROSListener.cpp
+  src/ROSPublisher.cpp
 )
 
 ## Add header files
 set(HEADER_FILES
-#   include/vsc_nmpc_uav_target_tracking/Controller_old.hpp
   include/vsc_nmpc_uav_target_tracking/DynamicsCalculator.hpp
-  # include/vsc_nmpc_uav_target_tracking/FeatureData.hpp
   include/vsc_nmpc_uav_target_tracking/NMPCController.hpp
   include/vsc_nmpc_uav_target_tracking/NMPCProblem.hpp
   include/vsc_nmpc_uav_target_tracking/VelocityTransformer.hpp
+  include/vsc_nmpc_uav_target_tracking/ROSListener.hpp
+  include/vsc_nmpc_uav_target_tracking/ROSPublisher.hpp
 )
 
 ## Declare a C++ library

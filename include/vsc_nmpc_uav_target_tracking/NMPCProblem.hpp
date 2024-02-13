@@ -38,8 +38,6 @@ public:
                    double x2, double g2, double Z2, double x3, double g3, double Z3);
 
 private:
-    // NLopt optimizer
-    // nlopt::opt optimizer;
     nlopt_opt opt; // NLopt optimization object
 
     // Dynamics Calculator
