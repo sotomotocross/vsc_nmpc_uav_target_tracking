@@ -1,4 +1,6 @@
 <launch>
-
-   <node pkg="vsc_nmpc_uav_target_tracking" type="track_ibvs_nmpc" name="track_ibvs_nmpc" output="screen" /> 
-</launch> 
+    <node name="vsc_nmpc_uav_target_tracking" pkg="vsc_nmpc_uav_target_tracking" type="ibvs_nmpc_node" output="screen">
+        <rosparam file="$(find vsc_nmpc_uav_target_tracking)/config/ibvs_nmpc_gains.yaml" />
+        <param name="yaml_filename" value="$(find vsc_nmpc_uav_target_tracking)/config/ibvs_nmpc_gains.yaml" />
+    </node>
+</launch>
