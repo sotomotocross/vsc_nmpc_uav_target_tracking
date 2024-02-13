@@ -15,8 +15,18 @@ public:
     NMPCProblem();
     ~NMPCProblem();
 
+    // Method to set x, g, and Z values
+    void setValues(double x0, double g0, double Z0, double x1, double g1, double Z1,
+                   double x2, double g2, double Z2, double x3, double g3, double Z3);
+
     // Set up the optimization problem
     void setup();
+
+    // Solve the optimization problem
+    std::pair<double, std::vector<double>> solve(double *inputs, double minJ);
+
+
+
 
     // Objective function for the optimization problem
     double costFunction(unsigned int n, const double *x, double *grad, void *data);
@@ -28,14 +38,7 @@ public:
     static double costFunctionWrapper(unsigned n, const double *x, double *grad, void *data);
 
     // Declaration of constraints function wrapper
-    static void constraintsWrapper(unsigned m, double *result, unsigned n, const double *x, double *grad, void *data);
-
-    // Solve the optimization problem
-    std::pair<double, std::vector<double>> solve(double *inputs, double minJ);
-
-    // Method to set x, g, and Z values
-    void setValues(double x0, double g0, double Z0, double x1, double g1, double Z1,
-                   double x2, double g2, double Z2, double x3, double g3, double Z3);
+    static void constraintsWrapper(unsigned m, double *result, unsigned n, const double *x, double *grad, void *data);     
 
 private:
     nlopt_opt opt; // NLopt optimization object
@@ -111,3 +114,4 @@ private:
     double sc_x;
     double sc_y;
 };
+
