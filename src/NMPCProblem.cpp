@@ -1,4 +1,3 @@
-// NMPCProblem.cpp
 #include "vsc_nmpc_uav_target_tracking/NMPCProblem.hpp"
 #include "vsc_nmpc_uav_target_tracking/NMPCController.hpp"
 #include "vsc_nmpc_uav_target_tracking/DynamicsCalculator.hpp"
@@ -61,7 +60,7 @@ NMPCProblem::NMPCProblem()
   Q.setIdentity(dim_s, dim_s);
   R.setIdentity(dim_inputs, dim_inputs);
   P.setIdentity(dim_s, dim_s);
-  
+
   s_des.setZero(dim_s,mpc_hrz+1);
 
   Q *= 10;
@@ -159,7 +158,7 @@ double NMPCProblem::costFunction(unsigned int n, const double *x, double *grad, 
   MatrixXd traj_s(dim_s, mpc_hrz + 1);
   traj_s.setZero(dim_s, mpc_hrz + 1);
   traj_s.col(0) << x0, g0, x1, g1, x2, g2, x3, g3;
-  
+
   // cout << "traj_s: \n" << traj_s << endl;
   // cout << "inputs: \n" << inputs << endl;
 
@@ -293,3 +292,4 @@ std::pair<double, std::vector<double>> NMPCProblem::solve(double *inputs, double
 
   return std::make_pair(minJ, optimizedInputs); // Return optNum and the optimized inputs
 }
+
